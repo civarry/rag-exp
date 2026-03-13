@@ -1,0 +1,278 @@
+{
+  "blob_all": [
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the root cause of the issue (old API key being cached in Redis) and the solution (reducing TTL or adding cache invalidation). However, it does not mention the specific TTL values (24 hours vs 12 hours) and the exact fix deployed in v2.4.2.",
+      "retrieved": "SHOP-101",
+      "correct_retrieval": true,
+      "answer": "The Stripe payment errors were caused by the old Stripe API key being cached in Redis and used for ~15% of requests after the API key rotation. This was due to the Redis TTL (time to live) for the str"
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts, including the cause of the issue, the environment where the SendGrid key was updated, and the resolution. It also avoids making up any information not present in the context.",
+      "retrieved": "SHOP-503",
+      "correct_retrieval": true,
+      "answer": "Customers are not receiving order status emails because SendGrid API calls are failing with a 403 Forbidden error. This issue was caused by a SendGrid API key rotation last week, but the new key was o"
+    },
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely incorrect as it does not address the search zero results problem at all, and it does not make any claims outside of the provided context.",
+      "retrieved": "SHOP-204",
+      "correct_retrieval": false,
+      "answer": "The search zero results problem is being solved by showing greyed out facet values with a \"(0)\" count. This allows users to understand why their option isn't clickable."
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the root cause of the overselling bug as a race condition in the inventory service and provides a correct fix using an atomic UPDATE statement with a WHERE clause. The answer also mentions the addition of a database constraint to enforce a positive count, which is consistent with the ground truth.",
+      "retrieved": "SHOP-601",
+      "correct_retrieval": true,
+      "answer": "The root cause of the overselling bug is a race condition in the inventory service. Specifically, the issue arises from the non-atomic check-and-decrement operation:\n\n```python\ncount = db.query(\"SELEC"
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it misses the key point about the connection pool being exhausted within 5 minutes and the role of auto-scaling in making the issue worse. The answer also doesn't mention the fixes implemented, but it does accurately describe the root cause of the issue.",
+      "retrieved": "SHOP-402",
+      "correct_retrieval": true,
+      "answer": "The database connections ran out during Black Friday due to long-running inventory check queries that held connections while waiting for row-level locks on popular items. These queries averaged 2.3 se"
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the incorrect formula, its effect, and the correct formula. It also mentions the PR number and the addition of unit tests, which are present in the ground truth.",
+      "retrieved": "SHOP-901",
+      "correct_retrieval": true,
+      "answer": "The conversion rate metric in the analytics dashboard is wrong because the formula in `analytics_service/reports.py` line 234 is incorrect. Specifically, the numerator and denominator are swapped. The"
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the security issue with JWT tokens after password changes, the impact of the issue, and the chosen fix. It also avoids making up any information not present in the context.",
+      "retrieved": "SHOP-302",
+      "correct_retrieval": true,
+      "answer": "According to the context, after a user changes their password, the existing JWT tokens are still valid for up to 24 hours (the current JWT expiry time). This is a security issue because an attacker wh"
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts from the ground truth, covering all key points and not introducing any unsupported claims. The answerer correctly identifies the root causes of the slow product page load and proposes valid solutions.",
+      "retrieved": "SHOP-401",
+      "correct_retrieval": true,
+      "answer": "Based on the provided context, the main issues causing the product page to load slowly on mobile are:\n\n1. **Hero product image is 2.4MB unoptimized JPEG**: This large image is likely causing a signifi"
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the incorrect status mapping and the lack of signature verification. It also correctly mentions the fixes implemented in PR #910 and the backfilling of orders with incorrect statuses.",
+      "retrieved": "SHOP-501",
+      "correct_retrieval": true,
+      "answer": "According to the context, there are two issues with the FedEx webhook integration:\n\n1. **Incorrect status mapping**: The current status mapping in the webhook handler is incorrect. Specifically:\n   - "
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states all the facts from the ground truth, covering the breakdown of the pipeline time, the optimization plan, and the current progress. It also avoids making up any information not present in the context.",
+      "retrieved": "SHOP-1001",
+      "correct_retrieval": true,
+      "answer": "The CI/CD pipeline is slow due to the following reasons:\n\n1. No caching for dependencies installation, which takes 8 minutes.\n2. Sequential unit tests, which take 12 minutes.\n3. Integration tests that"
+    }
+  ],
+  "overlap_direct": [
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer partially captures the correct facts about Stripe error codes and retry logic, but it fails to address the root cause of the Stripe payment errors and the actual fix. The answer does not introduce any new information not present in the context.",
+      "retrieved": "SHOP-104",
+      "correct_retrieval": false,
+      "answer": "Unfortunately, the provided context does not explicitly mention the specific Stripe payment errors that occurred or how they were fixed. It only mentions the need to implement payment retry logic with"
+    },
+    {
+      "correctness": 0,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer contains no correct facts from the ground truth, and it does not cover any key points. The answer is entirely grounded in the context, but it fails to provide any accurate information.",
+      "retrieved": "SHOP-503",
+      "correct_retrieval": true,
+      "answer": "Unfortunately, the provided context does not contain a clear reason why customers are not receiving order status emails. However, it does mention that the issue started 3 days ago and customers are co"
+    },
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely wrong as it does not mention the solution to the search zero results problem. It only describes the issue and asks for examples of failing queries, without providing any information on how the problem is being solved.",
+      "retrieved": "SHOP-201",
+      "correct_retrieval": true,
+      "answer": "The context does not mention how the search zero results problem is being solved. In fact, it only describes the issue itself and asks for examples of failing queries. There is no information provided"
+    },
+    {
+      "correctness": 4,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the root cause as a concurrency issue, but incorrectly assumes the shared data is the inventory count. The answer also makes some unsupported claims about the fix, such as implementing locking mechanisms, which is not mentioned in the ground truth.",
+      "retrieved": "SHOP-601",
+      "correct_retrieval": true,
+      "answer": "Unfortunately, the provided context does not explicitly mention the root cause of the overselling bug and the fix. However, based on the description of a \"race condition in inventory service,\" it can "
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer correctly states that the PostgreSQL connection pool was exhausted, but fails to provide the root cause. It also avoids making up information not present in the context.",
+      "retrieved": "SHOP-402",
+      "correct_retrieval": true,
+      "answer": "Unfortunately, the provided context does not explicitly state why the database connections ran out during Black Friday. It only mentions that the PostgreSQL connection pool was exhausted within 5 minu"
+    },
+    {
+      "correctness": 5,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer correctly states that the conversion rate metric is wrong, which matches the ground truth. However, it lacks details about the cause of the error and the fix, which are key points in the ground truth.",
+      "retrieved": "SHOP-901",
+      "correct_retrieval": true,
+      "answer": "The conversion rate metric is wrong on the analytics dashboard."
+    },
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about JWT tokens not being invalidated after a password change, which is a security issue. It also correctly notes the potential impact of this vulnerability, but does not mention the specific fix or the 'Log out all sessions' button, which slightly reduces the completeness score.",
+      "retrieved": "SHOP-302",
+      "correct_retrieval": true,
+      "answer": "Based on the provided context, it appears that JWT (JSON Web Token) tokens are not being invalidated after a password change. This means that if an attacker has obtained a valid JWT token from a compr"
+    },
+    {
+      "correctness": 4,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the hero product image as a large JPEG file and suggests optimizing it as a WebP file with lazy loading, which is correct. However, it misses the other two key issues mentioned in the ground truth: third-party scripts blocking the main thread and the lack of server-side rendering. The answer also avoids making up information not in the context, sticking to the provided details.",
+      "retrieved": "SHOP-401",
+      "correct_retrieval": true,
+      "answer": "According to the context, the product page is loading slowly on mobile due to the following issues:\n\n1. The hero product image is a large, unoptimized JPEG file (2.4MB) that should be optimized as a W"
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the incorrect status mapping and the missing signature verification, but it does not mention the specific incorrect mappings (IT to Processing, DL to Shipped, and DE not handled). The answer also does not mention the issue of fake status updates due to the lack of verification.",
+      "retrieved": "SHOP-501",
+      "correct_retrieval": true,
+      "answer": "According to the context, there are two issues with the FedEx webhook integration:\n\n1. The status mapping is incorrect, which is indicated by the error code [SHOP-501].\n2. The FedEx webhook signature "
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the dependency installation as a slow point, but misses the specific details about the unit tests and integration tests. The answer also avoids making up information not present in the context.",
+      "retrieved": "SHOP-1001",
+      "correct_retrieval": true,
+      "answer": "Based on the provided context, the CI/CD pipeline is slow due to the following reasons:\n\n1. **No caching for dependencies installation**: The pipeline takes 8 minutes to install dependencies, which is"
+    }
+  ],
+  "overlap_llm_expand": [
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the goal of implementing payment retry logic and the target payment failure rate, but it does not accurately identify the root cause of the Stripe payment errors. The answer avoids making up information not in the context, sticking to the provided information about the goal and the planned solution.",
+      "retrieved": "SHOP-104",
+      "correct_retrieval": false,
+      "answer": "Unfortunately, the provided context does not explicitly mention the cause of the Stripe payment errors. However, it does mention that the goal is to implement payment retry logic with exponential back"
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the 403 Forbidden error code as the cause of the issue, but it doesn't mention the root cause of the SendGrid API key being rotated but not updated in production. The answer avoids making up any information not present in the context.",
+      "retrieved": "SHOP-503",
+      "correct_retrieval": true,
+      "answer": "Based on the provided context, customers are not receiving order status emails because SendGrid API calls are failing with a 403 Forbidden error code. This indicates that the API request is being bloc"
+    },
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely wrong as it states that there is no mention of a solution, whereas the ground truth provides a detailed explanation of the solution. The answer avoids making up information not in the context, but this is not enough to save it from being incorrect.",
+      "retrieved": "SHOP-201",
+      "correct_retrieval": true,
+      "answer": "Unfortunately, the provided context does not mention how the search zero results problem is being solved. The comments mention the issue and provide examples of failing queries, but there is no mentio"
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the root cause of the overselling bug as a race condition, but it doesn't mention the specific database constraint added to prevent negative inventory counts. The answer also provides alternative solutions, such as using locks, which are not mentioned in the ground truth.",
+      "retrieved": "SHOP-601",
+      "correct_retrieval": true,
+      "answer": "Based on the provided context, the root cause of the overselling bug is a **race condition** in the inventory service. This occurs when two concurrent requests:\n\n1. Read the same inventory count (e.g."
+    },
+    {
+      "correctness": 4,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the PostgreSQL connection pool exhaustion and the spike in traffic, but misses the root cause of the long-running inventory check queries and the fixes implemented. The answer stays grounded in the provided context without making any unsupported claims.",
+      "retrieved": "SHOP-402",
+      "correct_retrieval": true,
+      "answer": "The database connections ran out during the Black Friday flash sale because the PostgreSQL connection pool was exhausted within 5 minutes of the sale starting. This was due to a significant spike in t"
+    },
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the correct formula and the reason for the bug, but it doesn't mention the specific line of code or the PR number. It also doesn't mention the unit tests added for all metric calculations.",
+      "retrieved": "SHOP-901",
+      "correct_retrieval": true,
+      "answer": "The conversion rate metric is wrong because the numerator and denominator are swapped. The correct formula is unique_sessions_with_purchase / total_unique_sessions, but it was incorrectly calculated a"
+    },
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the security issue with JWT tokens remaining valid after a password change, and correctly identifies the potential impact of this vulnerability. However, it does not mention the specific fix implemented in migration PR #885, which is a key point from the ground truth.",
+      "retrieved": "SHOP-302",
+      "correct_retrieval": true,
+      "answer": "According to the context, JWT tokens are still valid after a user changes their password. This is a security issue as it allows an attacker's JWT token to remain valid for up to 24 hours (the current "
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts from the ground truth, covering all key points and not introducing any unsupported claims. The answer is a direct reflection of the provided context.",
+      "retrieved": "SHOP-401",
+      "correct_retrieval": true,
+      "answer": "Based on the provided context, the main issues causing the product page to load slowly on mobile are:\n\n1. **Hero product image is 2.4MB unoptimized JPEG**: This large image size contributes to the slo"
+    },
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the incorrect status mapping and the lack of signature verification. However, it does not mention the specific incorrect mappings (IT to Processing, DL to Shipped, and DE not handled) and the impact on customers.",
+      "retrieved": "SHOP-501",
+      "correct_retrieval": true,
+      "answer": "According to the context, there are two issues with the FedEx webhook integration:\n\n1. The status mapping was incorrect, which is now fixed in PR #910.\n2. The webhook endpoint did not have signature v"
+    },
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the CI/CD pipeline's slow performance and the optimization plan. However, it misses the specific target time of under 15 minutes and the progress made so far in optimization.",
+      "retrieved": "SHOP-1001",
+      "correct_retrieval": true,
+      "answer": "The CI/CD pipeline is slow due to the following reasons:\n\n1. **No caching for dependencies installation**: The pipeline takes 8 minutes to install dependencies, which can be significantly reduced by i"
+    }
+  ]
+}

@@ -1,0 +1,983 @@
+{
+  "experiment": "final_rag_pipeline",
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "cross_encoder_model": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+  "llm_model": "llama-3.1-8b-instant",
+  "blob_size_threshold": 8000,
+  "chunk_size": 500,
+  "chunk_overlap": 100,
+  "num_historical_tickets": 36,
+  "num_incoming_tickets": 10,
+  "strategies": [
+    "adaptive_blob_chunk",
+    "hyde",
+    "multi_vector",
+    "hyde_multi_vector",
+    "rerank",
+    "query_rewrite_adaptive"
+  ],
+  "results": {
+    "NEW-001": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "SHOP-102",
+          "SHOP-104",
+          "LONG-301"
+        ],
+        "resolution": "[LLM call failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.1-8b-instant` in organization `org_01hwwc0f4de579z3h94v8r9zbp` service tier `on_demand` on tokens per minute (TPM): Limit 6000, Used 5706, Requested 1322. Please try again in 10.28s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}]",
+        "scores": {
+          "correctness": 0,
+          "completeness": 0,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution does not address the actual issue and does not contain any relevant information from the ground truth. It appears to be unrelated to the problem described in the ticket."
+        },
+        "retrieval_hit": false
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "SHOP-104",
+          "SHOP-102",
+          "SHOP-101"
+        ],
+        "resolution": "Based on the historical tickets, I'll suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nFrom the historical tickets, we can see that similar issues have been resolved in the past. However, the current issue seems to be related to the recent credential rotation by the infra team. This might be causing issues with the payment gateway, leading to intermittent payment failures.\n\n**Similar Historical Tickets:**\n\n1. **SHOP-101**: This ticket is similar to the current issue, where a 500 error was occurring due to Stripe API key rotation. The solution was to invalidate the cache after key rotation by reducing the TTL to 6h or adding a cache bust on rotation.\n2. **SHOP-104**: This ticket implemented payment retry logic with exponential backoff, which might help in reducing the payment failure rate.\n\n**Resolution:**\n\nBased on the historical tickets, I suggest the following resolution:\n\n1. **Verify Stripe API key rotation**: Confirm that the Stripe API key rotation was done correctly and that the old key is not being cached in Redis.\n2. **Reduce Redis TTL for Stripe API key**: Reduce the TTL for the Stripe API key in Redis to 6h to ensure that the cache is invalidated after key rotation.\n3. **Implement payment retry logic**: Implement the payment retry logic with exponential backoff as described in SHOP-104. This will help in reducing the payment failure rate and providing a better user experience.\n4. **Monitor and analyze logs**: Monitor the logs to identify any patterns or issues that might be causing the payment failures.\n\n**Code Changes:**\n\n1. Update the Redis TTL for the Stripe API key to 6h.\n2. Implement the payment retry logic using the tenacity library with exponential backoff.\n\n**Configuration Updates:**\n\n1. Update the Redis configuration to reduce the TTL for the Stripe API key.\n2. Configure the payment retry logic with exponential backoff.\n\n**Additional Recommendations:**\n\n1. Review the Stripe error codes to ensure that they are being handled correctly.\n2. Consider adding a pre-check before showing the refund button to prevent silent failures.\n\nBy following these steps, we should be able to resolve the payment failures in production and provide a better user experience.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the possible root cause of the issue and proposes a solution to reduce the Redis TTL for the Stripe API key. However, it does not explicitly mention the cache invalidation on key rotation as the ground truth resolution does."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "SHOP-104",
+          "SHOP-802",
+          "SHOP-101"
+        ],
+        "resolution": "Based on the historical tickets, I would suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The intermittent payment failures are likely due to the credential rotation performed by the infra team, which may have caused the old Stripe API key to be cached in Redis.\n\n**Exact Fix:** To resolve the issue, we need to invalidate the cache after key rotation. This can be achieved by either reducing the TTL (time to live) of the Redis cache for the Stripe API key to 6 hours or by adding a cache bust on rotation.\n\n**Code Changes:** No code changes are required, but we need to update the Redis configuration to either reduce the TTL or add a cache bust on rotation.\n\n**Configuration Updates:**\n\n1. Update the Redis configuration to reduce the TTL for the Stripe API key to 6 hours. This can be done by updating the `redis.conf` file or by using a Redis client library to set the TTL dynamically.\n2. Alternatively, add a cache bust on rotation by updating the code to invalidate the cache after each key rotation. This can be done by calling the `DEL` command on the Redis client to remove the cached key.\n\n**Additional Recommendations:**\n\n1. Review the Stripe error codes to ensure that we are categorizing them correctly and handling retryable errors properly.\n2. Consider implementing retry logic using a library like tenacity to handle exponential backoff and retries.\n\n**Monitoring and Verification:**\n\n1. Monitor the payment gateway errors and verify that the issue is resolved after implementing the fix.\n2. Review the Redis cache to ensure that the TTL is being updated correctly and that the cache is being invalidated after key rotation.\n\nBy following these steps, we should be able to resolve the intermittent payment failures and prevent similar issues from occurring in the future.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and provides a correct fix, matching the ground truth. It also includes additional recommendations and monitoring steps that are relevant to the issue."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "SHOP-101",
+          "SHOP-103",
+          "SHOP-501"
+        ],
+        "resolution": "Based on the historical tickets provided, I will attempt to suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\nGiven that the infra team performed credential rotation recently, and the issue started around the same time, it's likely that the root cause is related to the Stripe API key rotation. The historical ticket SHOP-101 suggests that the old key is being cached in Redis and used for a portion of requests.\n\n**Exact Fix:**\nTo resolve the issue, we should follow the fix suggested in SHOP-101:\n\n1. Reduce the TTL (time to live) for the Redis cache of the Stripe API key from 24h to 6h. This will ensure that the cache is invalidated and updated with the new key after rotation.\n2. Alternatively, we can add a cache bust on rotation to invalidate the cache immediately after key rotation.\n\n**Code Changes:**\nNo code changes are required in this case, as the fix involves updating the Redis configuration.\n\n**Configuration Updates:**\nUpdate the Redis configuration to reduce the TTL for the Stripe API key cache to 6h or add a cache bust on rotation.\n\n**Additional Steps:**\nTo confirm the fix, we should:\n\n1. Monitor the payment gateway errors to ensure that the issue is resolved.\n2. Verify that the Redis cache is being updated correctly with the new Stripe API key after rotation.\n\n**Conclusion:**\nBased on the historical tickets, it's likely that the root cause of the payment failures is related to the Stripe API key rotation. By reducing the TTL for the Redis cache or adding a cache bust on rotation, we should be able to resolve the issue.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and provides the exact fix steps as the ground truth. It also includes all necessary configuration updates and additional steps to confirm the fix."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "SHOP-104",
+          "LONG-101",
+          "SHOP-802"
+        ],
+        "resolution": "Based on the historical tickets provided, I'll attempt to suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nGiven the historical tickets, I'll analyze the possible root causes for the payment failures:\n\n1. **Historical Ticket SHOP-104**: This ticket introduced payment retry logic with exponential backoff. However, it doesn't seem directly related to the current issue.\n2. **Historical Ticket LONG-101**: This ticket highlights a production database failover issue, which might be related to the current problem. The failover node had a different pg_hba.conf configuration, causing connection failures. Although the issue was resolved, it's possible that similar configuration discrepancies might be causing the payment failures.\n3. **Historical Ticket SHOP-802**: This ticket is about accessibility audit failures, which doesn't seem directly related to the current issue.\n\n**Possible Root Cause:**\n\nBased on the analysis, I'll consider the following possible root cause:\n\n* **Configuration discrepancies**: Similar to the database failover issue in LONG-101, it's possible that configuration discrepancies between the primary and secondary payment gateway instances are causing the payment failures.\n\n**Resolution:**\n\nTo resolve the issue, I'll suggest the following steps:\n\n1. **Verify configuration parity**: Check if the primary and secondary payment gateway instances have identical configurations, including any recent changes or updates.\n2. **Implement automated sync mechanism**: Consider implementing an automated sync mechanism to ensure that the primary and secondary instances have identical configurations, similar to the solution proposed in LONG-101.\n3. **Monitor payment gateway logs**: Monitor the payment gateway logs to identify any patterns or errors that might indicate configuration discrepancies or other issues.\n4. **Test payment retry logic**: Test the payment retry logic with exponential backoff to ensure it's working correctly and not causing any additional issues.\n\n**Code Changes and Configuration Updates:**\n\nBased on the historical tickets, I'll suggest the following code changes and configuration updates:\n\n* **Verify and update pg_hba.conf**: Verify that the pg_hba.conf configuration is identical on both primary and secondary payment gateway instances and update it if necessary.\n* **Implement automated sync mechanism**: Implement an automated sync mechanism to ensure that the primary and secondary instances have identical configurations.\n* **Monitor payment gateway logs**: Monitor the payment gateway logs to identify any patterns or errors that might indicate configuration discrepancies or other issues.\n\n**Additional Recommendations:**\n\nBased on the historical tickets, I'll suggest the following additional recommendations:\n\n* **Review recent changes**: Review any recent changes or updates to the payment gateway configuration",
+        "scores": {
+          "correctness": 2,
+          "completeness": 2,
+          "hallucination": 4,
+          "reasoning": "The suggested resolution contains some correct facts but introduces a new root cause (configuration discrepancies) not supported by the historical tickets. It also fails to identify the actual root cause (stale API key cached in Redis) and proposes unrelated fixes."
+        },
+        "retrieval_hit": false
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "SHOP-102",
+          "SHOP-104",
+          "SHOP-101"
+        ],
+        "resolution": "Based on the historical tickets, I'll attempt to identify the root cause and suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\n1. Historical Ticket SHOP-101: Stripe API key rotation caused a 15% failure rate due to cached old API keys in Redis. This was resolved by reducing the TTL for the stripe_api_key cache or adding a cache bust on rotation.\n2. Historical Ticket SHOP-104: Payment retry logic with exponential backoff was implemented to reduce payment failure rates. This suggests that transient errors (network issues) are a common cause of payment failures.\n3. Historical Ticket SHOP-102: PayPal error code 10009 (Transaction refused) was not being handled properly, leading to silent refund failures.\n\n**Possible Root Cause for the New Incoming Ticket:**\n\nGiven the recent credential rotation by the infra team, it's possible that the issue is related to cached credentials or API keys. This could be causing a subset of payment attempts to fail with a 500 error from the payment gateway.\n\n**Suggested Resolution:**\n\n1. **Verify API Key Rotation:** Confirm that the infra team's credential rotation was successful and that the new credentials are being used for all payment attempts.\n2. **Check Cache Configuration:** Review the cache configuration for the payment gateway credentials. Ensure that the TTL is set to a reasonable value (e.g., 6 hours) and that cache busting is implemented on rotation.\n3. **Implement Payment Retry Logic:** If the issue persists, consider implementing payment retry logic with exponential backoff, similar to Historical Ticket SHOP-104. This will help reduce the impact of transient errors and improve overall payment success rates.\n4. **Monitor and Analyze Logs:** Closely monitor payment logs and API logs to identify any patterns or errors that may indicate the root cause of the issue.\n\n**Code Changes and Configuration Updates:**\n\nBased on the historical tickets, the following code changes and configuration updates may be relevant:\n\n* Update the cache configuration for payment gateway credentials to ensure that the TTL is set to a reasonable value and that cache busting is implemented on rotation.\n* Implement payment retry logic with exponential backoff using a library like tenacity.\n* Review and update error handling for payment gateway errors, including PayPal error code 10009.\n\n**Additional Recommendations:**\n\n* Consider implementing a more robust cache invalidation strategy to ensure that cached credentials are updated promptly after rotation.\n* Monitor payment success rates and error rates closely to identify any patterns or trends that may indicate the root cause of the issue.\n* Review",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the possible root cause of the issue and proposes a set of steps to investigate and fix it. However, it does not explicitly mention the stale API key cached in Redis as the root cause, which is a key detail in the ground truth."
+        },
+        "retrieval_hit": true
+      }
+    },
+    "NEW-002": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "SHOP-201",
+          "LONG-401",
+          "SHOP-204"
+        ],
+        "resolution": "Based on the historical tickets, I will provide a suggested resolution for the new incoming ticket.\n\n**Root Cause:** The search is too strict and does not handle typos or misspellings.\n\n**Similar Historical Tickets:**\n\n1. SHOP-201: Search returns 0 results for misspelled queries - no fuzzy matching\n2. LONG-401: Search indexing pipeline drops documents silently when Elasticsearch bulk API returns partial failures (not directly related to the issue, but provides insight into the importance of handling errors in Elasticsearch)\n3. SHOP-204: Faceted search filters for product attributes (not directly related to the issue, but provides insight into the use of Elasticsearch aggregations and post_filter)\n\n**Resolution:**\n\n1. **Fuzzy Matching:** Enable fuzzy matching with edit distance 2 using the `fuzziness=AUTO` parameter in the `match` query. This will allow the search to match terms with a maximum edit distance of 2.\n2. **Phonetic Matching:** Enable phonetic matching using the Elasticsearch phonetic analysis plugin. This will allow the search to match terms based on their phonetic similarity.\n3. **Synonym Mapping:** Create a synonym mapping for common product terms to improve search results.\n4. **Did You Mean... Suggestion:** Use the Elasticsearch suggest API to provide a \"Did you mean...\" suggestion for users who enter misspelled queries.\n\n**Code Changes:**\n\n1. Update the search query to include the `fuzziness=AUTO` parameter:\n```python\nmatch_query = {\n    \"query\": {\n        \"match\": {\n            \"product_name\": {\n                \"query\": query,\n                \"fuzziness\": \"AUTO\"\n            }\n        }\n    }\n}\n```\n2. Install and configure the Elasticsearch phonetic analysis plugin:\n```bash\nbin/elasticsearch-plugin install analysis-phonetic\n```\n3. Update the search mapping to include the phonetic analysis field:\n```json\n{\n    \"properties\": {\n        \"product_name\": {\n            \"type\": \"text\",\n            \"fields\": {\n                \"phonetic\": {\n                    \"type\": \"phonetic\"\n                }\n            }\n        }\n    }\n}\n```\n4. Use the Elasticsearch suggest API to provide a \"Did you mean...\" suggestion:\n```python\nsuggest_query = {\n    \"suggest\": {\n        \"text\": query,\n        \"term\": {\n            \"size\": 5\n        }\n    }\n}\n```\n**Configuration Updates:**\n\n1. Update the Elasticsearch configuration to enable fuzzy matching",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause and proposes fuzzy matching, phonetic matching, and synonym mapping as solutions. However, it incorrectly specifies the fuzziness parameter as \"AUTO\" instead of the correct edit distances for 3-5 char terms and longer terms."
+        },
+        "retrieval_hit": true
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "SHOP-201",
+          "LONG-401",
+          "SHOP-203"
+        ],
+        "resolution": "Based on the historical tickets, I'll suggest a resolution for the new incoming ticket.\n\n**Root Cause:** The search is too strict and doesn't handle typos or misspellings, resulting in zero results for users with typos.\n\n**Similar Historical Tickets:**\n\n1. **SHOP-201**: This ticket is similar to the new incoming ticket, as it also deals with search results returning zero for misspelled queries. The solution proposed in SHOP-201 involves adding fuzzy matching with edit distance 2, phonetic matching using the ES phonetic analysis plugin, and synonym mapping for common product terms.\n2. **SHOP-203**: This ticket is not directly related to the new incoming ticket, but it provides some context on how to optimize ES indexing performance.\n\n**Resolution:**\n\n1. **Enable Fuzzy Matching:** Based on SHOP-201, enable fuzzy matching with edit distance 2 using the `fuzziness=AUTO` parameter in the `match` query. This will allow the search to return results for queries with typos.\n2. **Phonetic Matching:** Implement phonetic matching using the ES phonetic analysis plugin to handle queries with similar-sounding words.\n3. **Synonym Mapping:** Create a synonym mapping for common product terms to ensure that related queries return relevant results.\n4. **Did You Mean... Suggestion:** As suggested in SHOP-201, implement a \"Did you mean...\" suggestion feature using the ES suggest API to provide users with alternative search queries.\n\n**Code Changes:**\n\n1. Update the search query to include the `fuzziness=AUTO` parameter.\n2. Implement phonetic matching using the ES phonetic analysis plugin.\n3. Create a synonym mapping for common product terms.\n4. Implement the \"Did you mean...\" suggestion feature using the ES suggest API.\n\n**Configuration Updates:**\n\n1. Update the ES configuration to enable fuzzy matching with edit distance 2.\n2. Configure the ES phonetic analysis plugin to handle phonetic matching.\n3. Update the synonym mapping for common product terms.\n\n**Additional Recommendations:**\n\n1. Monitor the search performance and adjust the fuzzy matching parameters as needed to ensure optimal results.\n2. Consider implementing incremental indexing to reduce the load on the ES cluster during bulk indexing operations.\n\nBy following these steps, you should be able to resolve the issue of users getting zero results for typos and implement a more robust search feature with fuzzy matching, phonetic matching, and synonym mapping.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately describes the root cause and proposes a solution that aligns with the ground truth. However, it lacks the specific detail about the edit distance for terms with 3-5 characters, which is mentioned in the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "SHOP-201",
+          "SHOP-204",
+          "LONG-401"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The search is too strict and does not handle typos or misspellings.\n\n**Fix:**\n\n1. **Fuzzy Matching:** Enable fuzziness=AUTO in the match query, which uses edit distance 1 for 3-5 char terms and distance 2 for >5 chars. This will allow the search to match terms with small typos.\n2. **Phonetic Matching:** Install and configure the ES phonetic analysis plugin to enable phonetic matching.\n3. **Synonym Mapping:** Create a synonym mapping for common product terms to improve search results.\n\n**Code Changes:**\n\n* Update the search query to include the `fuzziness=AUTO` parameter.\n* Install and configure the ES phonetic analysis plugin.\n* Create a synonym mapping for common product terms.\n\n**Configuration Updates:**\n\n* Update the ES configuration to enable fuzzy matching.\n* Update the synonym mapping configuration to include common product terms.\n\n**Additional Recommendations:**\n\n* Implement a 'Did you mean...' suggestion feature using the ES suggest API, as mentioned in SHOP-205.\n* Consider implementing a more advanced fuzzy matching algorithm, such as Levenshtein distance or Jaro-Winkler distance, if the current implementation does not meet the requirements.\n\n**Relevant Historical Ticket Information:**\n\n* SHOP-201: This ticket provides examples of queries that fail due to typos and suggests implementing fuzzy matching, phonetic matching, and synonym mapping.\n* SHOP-205: This ticket mentions implementing a 'Did you mean...' suggestion feature using the ES suggest API.\n\n**Code Changes from Historical Ticket LONG-401:**\n\n* The proposed fix for bulk_indexer.py in LONG-401 is not directly relevant to this ticket, but it provides a good example of how to handle individual document failures and retry failed documents. However, the size-based batching implementation in LONG-401 is not applicable to this ticket.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the ground truth, covering all key fix steps and technical details. It also avoids fabricating any information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "SHOP-201",
+          "SHOP-1102",
+          "LONG-401"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The search is too strict and does not handle typos or misspellings.\n\n**Fixes:**\n\n1. **Fuzzy Matching:** Enable fuzziness=AUTO in the match query to use edit distance 1 for 3-5 char terms, distance 2 for >5 chars. This will allow the search to match similar terms even with typos.\n2. **Phonetic Matching:** Use the ES phonetic analysis plugin to enable phonetic matching. This will allow the search to match terms that sound similar even if they are spelled differently.\n3. **Synonym Mapping:** Add a synonym mapping for common product terms to allow the search to match related terms.\n4. **Did you mean... Suggestion:** Use the ES suggest API to provide a \"Did you mean...\" suggestion for users who enter a search term that does not match any products.\n\n**Code Changes:**\n\n* Update the search query to include the `fuzziness=AUTO` parameter.\n* Install and configure the ES phonetic analysis plugin.\n* Add a synonym mapping for common product terms to the search index.\n* Implement the ES suggest API to provide a \"Did you mean...\" suggestion.\n\n**Configuration Updates:**\n\n* Update the search index to include the `fuzziness=AUTO` parameter.\n* Configure the ES phonetic analysis plugin to enable phonetic matching.\n* Update the synonym mapping for common product terms.\n\n**Additional Recommendations:**\n\n* Consider implementing a more advanced fuzzy matching algorithm, such as Levenshtein distance or Jaro-Winkler distance, to improve the accuracy of the search results.\n* Use the ES suggest API to provide a list of suggested search terms based on the user's input.\n* Consider implementing a \"Did you mean...\" feature that suggests alternative search terms based on the user's input.\n\n**Historical Ticket Relevance:**\n\n* Historical Ticket SHOP-201 is directly relevant to this issue, as it discusses the need for fuzzy matching and phonetic matching to handle typos and misspellings.\n* Historical Ticket SHOP-1102 is not directly relevant to this issue, but it does discuss the importance of using `startTransition` to prevent UI jank during search.\n* Historical Ticket LONG-401 is not directly relevant to this issue, but it does discuss the importance of monitoring and troubleshooting ES errors, which may be relevant to this issue if the fuzzy matching and phonetic matching features cause errors.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the ground truth, covering all key fix steps and technical details. It also avoids fabricating any information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "SHOP-201",
+          "LONG-401",
+          "SHOP-204"
+        ],
+        "resolution": "Based on the historical tickets, I'll provide a suggested resolution for the new incoming ticket.\n\n**Root Cause:** The search is too strict and doesn't handle typos or misspellings.\n\n**Similar Historical Tickets:**\n\n1. SHOP-201: Search returns 0 results for misspelled queries - no fuzzy matching\n2. LONG-401: Search indexing pipeline drops documents silently when Elasticsearch bulk API returns partial failures\n3. SHOP-204: Faceted search filters for product attributes\n\n**Resolution:**\n\n1. **Fuzzy Matching:** Enable fuzzy matching with edit distance 2 for terms with more than 5 characters. This can be achieved by setting `fuzziness=AUTO` in the `match` query. This will use edit distance 1 for 3-5 char terms and distance 2 for >5 chars.\n2. **Phonetic Matching:** Use the Elasticsearch phonetic analysis plugin to enable phonetic matching. This will help match words that sound similar but are spelled differently.\n3. **Synonym Mapping:** Create a synonym mapping for common product terms to help match related words.\n4. **Did You Mean... Suggestion:** Use the Elasticsearch suggest API to provide a \"Did you mean...\" suggestion for users who enter misspelled queries.\n\n**Code Changes:**\n\n1. Update the search query to include fuzzy matching and phonetic matching.\n2. Configure the Elasticsearch phonetic analysis plugin.\n3. Create a synonym mapping for common product terms.\n4. Implement the \"Did you mean...\" suggestion using the Elasticsearch suggest API.\n\n**Configuration Updates:**\n\n1. Update the Elasticsearch configuration to enable fuzzy matching and phonetic matching.\n2. Configure the Elasticsearch phonetic analysis plugin.\n3. Update the synonym mapping for common product terms.\n\n**Additional Recommendations:**\n\n1. Monitor the search indexing pipeline to ensure that documents are not being silently dropped due to partial failures.\n2. Implement retry logic for individual document failures to ensure that documents are not lost due to temporary errors.\n3. Consider implementing a more robust faceted search filter system to improve user experience.\n\n**Code Snippets:**\n\n```python\n# Update the search query to include fuzzy matching and phonetic matching\nquery = {\n    \"query\": {\n        \"match\": {\n            \"product_name\": {\n                \"query\": \"headphones\",\n                \"fuzziness\": \"AUTO\"\n            }\n        }\n    }\n}\n\n# Configure the Elasticsearch phonetic analysis plugin\nes_client.indices.put_mapping(index=\"products\", body={\n    \"properties\": {",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately describes the root cause and provides a comprehensive plan to address the issue, but it incorrectly specifies the edit distance for fuzzy matching. The resolution also avoids fabricating information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "SHOP-201",
+          "LONG-401",
+          "SHOP-204"
+        ],
+        "resolution": "Based on the historical tickets, I'll provide a suggested resolution for the new incoming ticket.\n\n**Root Cause:** The search is too strict and doesn't handle typos or misspellings.\n\n**Similar Historical Tickets:**\n\n1. **SHOP-201**: This ticket is similar to the new incoming ticket, as it also deals with search returning 0 results for misspelled queries. The solution proposed in SHOP-201 involves adding fuzzy matching with edit distance 2, phonetic matching using the ES phonetic analysis plugin, and synonym mapping for common product terms.\n\n**Applicable Fixes:**\n\n1. **Enable Fuzziness**: As mentioned in SHOP-201, enable fuzziness=AUTO in the match query to use edit distance 1 for 3-5 char terms and distance 2 for >5 chars.\n2. **Phonetic Matching**: Install and configure the ES phonetic analysis plugin to enable phonetic matching.\n3. **Synonym Mapping**: Create a synonym mapping for common product terms to improve search results.\n\n**Additional Recommendations:**\n\n1. **Implement 'Did you mean...' Suggestion**: As suggested in SHOP-201, use the ES built-in suggest API to provide a 'Did you mean...' suggestion feature.\n2. **Monitor Search Results**: Regularly monitor search results to ensure that the fuzzy matching and phonetic matching are working correctly and not causing any issues.\n\n**Code Changes:**\n\n1. Update the search query to include the fuzziness parameter: `match_query = {\"query\": {\"match\": {\"product_name\": {\"query\": \"headphones\", \"fuzziness\": \"AUTO\"}}}}`\n2. Install and configure the ES phonetic analysis plugin.\n3. Create a synonym mapping for common product terms.\n\n**Configuration Updates:**\n\n1. Update the ES configuration to enable fuzziness=AUTO.\n2. Configure the ES phonetic analysis plugin.\n3. Update the synonym mapping for common product terms.\n\n**Historical Ticket LONG-401** is not directly related to the new incoming ticket, but it's worth noting that the solution proposed in LONG-401 involves checking the individual document statuses in the bulk response, which is not applicable to this ticket.\n\n**Historical Ticket SHOP-204** is also not directly related to the new incoming ticket, but it's worth noting that the solution proposed in SHOP-204 involves using ES aggregations for facet counts, which is not applicable to this ticket.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause and proposes enabling fuzziness, phonetic matching, and synonym mapping. However, it does not mention the specific edit distances used for fuzziness, which is a minor error."
+        },
+        "retrieval_hit": true
+      }
+    },
+    "NEW-003": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "SHOP-302",
+          "LONG-501",
+          "SHOP-1103"
+        ],
+        "resolution": "Based on the historical tickets provided, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The old JWT tokens still work after a user resets their password because the token generation is not updated when the user changes their password.\n\n**Exact Fix:** Implement option A from Historical Ticket SHOP-302, which involves adding a `token_generation` column to the users table. When a user changes their password, increment the `token_generation` value and include it in the JWT. Validate each request by checking the `token_generation` value in the JWT against the current value in the users table.\n\n**Code Changes:**\n\n1. Add a `token_generation` column to the users table:\n```sql\nALTER TABLE users ADD COLUMN token_generation INT;\n```\n2. Update the password change endpoint to increment the `token_generation` value:\n```javascript\n// Update password endpoint\nconst user = await User.findOneAndUpdate({ _id: req.user._id }, { password: req.body.password });\nif (user) {\n  user.token_generation++;\n  await user.save();\n}\n```\n3. Update the JWT generation to include the `token_generation` value:\n```javascript\n// Generate JWT\nconst token = jwt.sign({\n  sub: user._id,\n  token_generation: user.token_generation,\n}, process.env.SECRET_KEY, { expiresIn: '24h' });\n```\n4. Update the JWT validation to check the `token_generation` value:\n```javascript\n// Validate JWT\nconst decoded = jwt.verify(token, process.env.SECRET_KEY);\nif (decoded.token_generation !== user.token_generation) {\n  return res.status(401).send({ message: 'Invalid token' });\n}\n```\n**Configuration Updates:** None required.\n\n**Additional Recommendations:**\n\n1. Implement a \"Log out all sessions\" button on the security settings page, as mentioned in Historical Ticket SHOP-302.\n2. Consider implementing a Redis blacklist of invalidated tokens, as mentioned in Historical Ticket SHOP-302, to provide an additional layer of security.\n3. Review the OAuth 2.0 implementation in Historical Ticket LONG-501 to ensure that it is properly configured and secure.\n4. Review the CSRF protection implementation in Historical Ticket SHOP-1103 to ensure that it is properly configured and secure.\n\nBy implementing these changes, you should be able to invalidate old JWT tokens when a user changes their password and provide a more secure authentication experience for your users.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the root cause and provides a precise fix by implementing the same solution as the ground truth. The code changes and configuration updates are identical to the ground truth, demonstrating a high level of correctness and completeness."
+        },
+        "retrieval_hit": true
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "SHOP-302",
+          "SHOP-1103",
+          "LONG-501"
+        ],
+        "resolution": "Based on the historical tickets provided, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The old JWT tokens still work after a user resets their password because the token generation is not updated when the user changes their password.\n\n**Exact Fix:** Implement option A from Historical Ticket SHOP-302, which involves adding a `token_generation` column to the users table. When a user changes their password, increment the `token_generation` value and include it in the JWT. Validate each request by checking the `token_generation` value in the JWT against the value stored in the users table.\n\n**Code Changes:**\n\n1. Add a `token_generation` column to the users table:\n```sql\nALTER TABLE users ADD COLUMN token_generation INT;\n```\n2. Update the password change endpoint to increment the `token_generation` value and update the JWT:\n```javascript\n// Update password change endpoint\nrouter.put('/users/:id/password', async (req, res) => {\n  const userId = req.params.id;\n  const user = await User.findById(userId);\n  if (!user) {\n    return res.status(404).send({ message: 'User not found' });\n  }\n  const newTokenGeneration = user.token_generation + 1;\n  user.token_generation = newTokenGeneration;\n  await user.save();\n  const newJwt = generateJwt(user);\n  res.send({ token: newJwt });\n});\n```\n3. Update the JWT generation function to include the `token_generation` value:\n```javascript\n// Generate JWT function\nfunction generateJwt(user) {\n  const tokenGeneration = user.token_generation;\n  const jwt = jwt.sign({\n    sub: user.id,\n    tokenGeneration,\n  }, process.env.SECRET_KEY, {\n    expiresIn: '24h',\n  });\n  return jwt;\n}\n```\n4. Update the JWT validation function to check the `token_generation` value:\n```javascript\n// Validate JWT function\nfunction validateJwt(req, res, next) {\n  const token = req.header('Authorization');\n  if (!token) {\n    return res.status(401).send({ message: 'Unauthorized' });\n  }\n  const decoded = jwt.verify(token, process.env.SECRET_KEY);\n  const user = await User.findById(decoded.sub);\n  if (!user) {\n    return res.status(404).send({ message: 'User not found' });\n  }\n  const tokenGeneration = decoded.tokenGeneration;\n  if (user.token_generation !== tokenGeneration) {\n    return res.status(401",
+        "scores": {
+          "correctness": 5,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the root cause of the issue and implements the exact fix as described in Historical Ticket SHOP-302. However, it misses the additional step of adding a 'Log out all sessions' button in security settings."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "SHOP-302",
+          "SHOP-1103",
+          "LONG-501"
+        ],
+        "resolution": "Based on the historical tickets provided, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The root cause of the issue is that old JWT tokens still work after a user resets their password. This is because the current implementation does not invalidate tokens on password change.\n\n**Fix Options:** Based on the historical tickets, we have two viable options to fix this issue:\n\n1. **Option A:** Token version/generation field in user table, increment on pw change, include in JWT, validate each request. This option was previously discussed in SHOP-302 and is the simplest solution that does not require any new infrastructure.\n2. **Option B:** Redis blacklist of invalidated tokens. This option was not discussed in the historical tickets, but it is a viable alternative to Option A.\n\n**Code Changes:**\n\n* Add a `token_generation` column to the users table, incrementing it on password change.\n* Update the JWT generation code to include the new `token_generation` value.\n* Update the JWT validation code to check the `token_generation` value.\n\n**Configuration Updates:**\n\n* Update the Redis configuration to store a blacklist of invalidated tokens.\n* Update the JWT configuration to use the new `token_generation` value.\n\n**Additional Recommendations:**\n\n* Implement a \"Log out all sessions\" button on the security settings page, as previously discussed in SHOP-302.\n* Consider implementing a refresh token rotation mechanism, as discussed in LONG-501, to handle concurrent requests on mobile devices.\n\n**Code Snippets:**\n\nHere are some code snippets to illustrate the changes:\n\n**Users Table Migration:**\n```sql\nALTER TABLE users ADD COLUMN token_generation INTEGER;\n```\n\n**JWT Generation Code:**\n```javascript\nconst jwt = require('jsonwebtoken');\n\nconst generateToken = (user) => {\n  const tokenGeneration = user.token_generation;\n  const payload = { ...user, tokenGeneration };\n  const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '24h' });\n  return token;\n};\n```\n\n**JWT Validation Code:**\n```javascript\nconst jwt = require('jsonwebtoken');\n\nconst validateToken = (token) => {\n  const decoded = jwt.verify(token, process.env.SECRET_KEY);\n  const tokenGeneration = decoded.tokenGeneration;\n  // Check if token generation matches the expected value\n  if (tokenGeneration !== user.token_generation) {\n    return false;\n  }\n  return true;\n};\n```\n\n**Redis Blacklist Configuration:**\n```javascript\nconst redis = require('redis');",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the ground truth, including the addition of a token generation column, incrementing it on password change, and validating it on each request. The code snippets and configuration updates also match the ground truth, demonstrating a thorough understanding of the issue and its solution."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "SHOP-302",
+          "LONG-501",
+          "SHOP-1103"
+        ],
+        "resolution": "Based on the historical tickets provided, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The root cause of the issue is that old JWT tokens still work after a user resets their password, allowing a compromised token to remain valid for up to 24 hours.\n\n**Exact Fix:** To resolve this issue, we should implement the solution proposed in Historical Ticket LONG-501, which involves:\n\n1. **Adding a `token_generation` field to the user table**: Increment this field on password change, include it in the refresh token payload, and validate it on use.\n2. **Revoking all refresh tokens for the user on password change**: This can be achieved by adding a `token_generation` field to the refresh token table and updating the `revoked_at` timestamp when a password change occurs.\n3. **Implementing a token revocation endpoint**: This endpoint should be used to revoke all refresh tokens for a user when a password change occurs.\n\n**Code Changes:**\n\n* Update the user table to include a `token_generation` field.\n* Update the refresh token table to include a `token_generation` field and a `revoked_at` timestamp.\n* Implement a token revocation endpoint that revokes all refresh tokens for a user when a password change occurs.\n* Update the OAuth server to include the `token_generation` field in the refresh token payload and validate it on use.\n\n**Configuration Updates:**\n\n* Update the `token_lifetime` parameter to support longer-lived access tokens for mobile clients.\n* Implement a `grace period` of 30 seconds for rotated-out refresh tokens to handle concurrent refresh without compromising security.\n\n**Additional Recommendations:**\n\n* Consider implementing a \"Log out all sessions\" button on the security settings page to allow users to invalidate all their active sessions.\n* Review the integration guide for the mobile app to ensure that it sends the CSRF token header on all POST/PUT/DELETE requests.\n\n**Code Snippets:**\n\n* Update the user table to include a `token_generation` field:\n```sql\nALTER TABLE users ADD COLUMN token_generation INTEGER;\n```\n* Update the refresh token table to include a `token_generation` field and a `revoked_at` timestamp:\n```sql\nALTER TABLE refresh_tokens ADD COLUMN token_generation INTEGER;\nALTER TABLE refresh_tokens ADD COLUMN revoked_at TIMESTAMP;\n```\n* Implement a token revocation endpoint:\n```python\n@app.route('/auth/revoke', methods=['POST'])\ndef revoke_token():\n    user_id = request.json['user_id']\n    token_generation = request.json",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately describes the root cause and proposes a solution to invalidate old JWT tokens after a password change. However, it does not include the specific implementation detail of adding a token_generation column to the users table and including it in the JWT payload, which is mentioned in the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "SHOP-302",
+          "SHOP-1103",
+          "LONG-501"
+        ],
+        "resolution": "Based on the historical tickets provided, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The old JWT tokens still work after a user resets their password because the token generation is not updated when the user changes their password.\n\n**Exact Fix:** Implement option A from Historical Ticket SHOP-302, which involves adding a `token_generation` column to the users table. Increment the `token_generation` value whenever a user changes their password. Include the new `token_generation` value in the JWT token and validate it on each request.\n\n**Code Changes:**\n\n1. Add a `token_generation` column to the users table in the database schema.\n2. Update the user model to include the `token_generation` value.\n3. Modify the password reset endpoint to increment the `token_generation` value when a user changes their password.\n4. Update the JWT token generation to include the new `token_generation` value.\n5. Modify the JWT token validation to check the `token_generation` value on each request.\n\n**Configuration Updates:**\n\n1. Update the Redis blacklist of invalidated tokens to include the old JWT tokens that were generated before the user changed their password.\n2. Update the JWT token expiry to 15 minutes to reduce the window of time during which an attacker's JWT token can still be valid.\n\n**Additional Recommendations:**\n\n1. Implement a \"Log out all sessions\" button on the security settings page to allow users to invalidate all their active sessions.\n2. Consider implementing a refresh token mechanism to provide a new JWT token to the user after a certain period of time, rather than relying on the old JWT token still being valid.\n\n**Code Snippets:**\n\nHere are some code snippets to illustrate the changes:\n```javascript\n// Update user model to include token_generation value\nconst userSchema = new mongoose.Schema({\n  // ...\n  token_generation: { type: Number, default: 0 }\n});\n\n// Modify password reset endpoint to increment token_generation value\nrouter.put('/password/reset', async (req, res) => {\n  const user = await User.findById(req.user._id);\n  user.token_generation++;\n  await user.save();\n  // ...\n});\n\n// Update JWT token generation to include token_generation value\nconst jwt = require('jsonwebtoken');\nconst token = jwt.sign({\n  // ...\n  token_generation: user.token_generation\n}, process.env.SECRET_KEY, { expiresIn: '15m' });\n\n// Modify JWT token validation to check token_generation value\nconst decoded = jwt.verify(token, process.env.SECRET_KEY",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the root cause and provides a precise fix by implementing a token generation column, incrementing it on password change, and validating it on each request. It also includes all the necessary code and configuration updates as well as additional recommendations from the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "SHOP-302",
+          "LONG-501",
+          "SHOP-1103"
+        ],
+        "resolution": "Based on the historical tickets provided, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The old JWT tokens still work after a user resets their password because the token generation is not updated when the user changes their password.\n\n**Similar Historical Tickets:**\n\n1. **SHOP-302:** This ticket is identical to the new incoming ticket. The solution proposed in SHOP-302 is to add a `token_generation` column to the users table, increment it on password change, include it in the JWT, and validate each request.\n2. **SHOP-1103:** Although this ticket is about CSRF protection, it mentions that JWT in headers is inherently CSRF-safe. However, it also mentions that mobile app falls back to cookie-based sessions when token refresh fails, which is not relevant to the new incoming ticket.\n\n**Resolution:**\n\nBased on SHOP-302, we will implement the following solution:\n\n1. **Add a `token_generation` column to the users table.**\n2. **Increment the `token_generation` value on password change.**\n3. **Include the new `token_generation` value in the JWT.**\n4. **Validate each request by checking the `token_generation` value in the JWT.**\n\n**Code Changes:**\n\n1. Update the users table schema to add a `token_generation` column.\n2. Update the password change endpoint to increment the `token_generation` value and update the JWT.\n3. Update the JWT validation logic to check the `token_generation` value.\n\n**Configuration Updates:**\n\n1. Update the Redis configuration to store the invalidated tokens (if using Redis for token storage).\n\n**Additional Recommendations:**\n\n1. Consider implementing a \"Log out all sessions\" button on the security settings page, as mentioned in SHOP-302.\n2. Review the token storage and revocation mechanisms to ensure they are secure and compliant with security requirements.\n\n**Timeline:**\n\n1. Implement the solution within the next 2-3 days.\n2. Test the solution thoroughly to ensure it works as expected.\n3. Deploy the solution to production once it has been thoroughly tested.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the ground truth, including the technical details and key fix steps. It also avoids fabricating any information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      }
+    },
+    "NEW-004": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "SHOP-402",
+          "LONG-101",
+          "SHOP-902"
+        ],
+        "resolution": "Based on the historical tickets provided, I will suggest a resolution for the new incoming ticket: \"Database connections exhausted under heavy traffic spike\".\n\n**Root Cause Analysis:**\nFrom the historical tickets, we can identify two main root causes that contributed to the connection pool exhaustion:\n\n1. **Long-running queries**: In SHOP-402, it was identified that long-running inventory check queries (avg 2.3s) hold connections while waiting for row-level locks on popular items. This caused the connection pool to be exhausted.\n2. **Stale pg_hba.conf**: In LONG-101, it was discovered that the failover PostgreSQL instance had a stale pg_hba.conf that did not include authentication rules for three microservices deployed after the DR drill. This caused cascading connection failures across the entire application stack.\n\n**Action Items:**\n\n1. **Deploy PgBouncer with transaction-level connection pooling**: As suggested in SHOP-402, deploy PgBouncer in front of PostgreSQL to handle transaction-level connection pooling. This will help reduce the number of actual DB connections required.\n2. **Optimize inventory queries with SELECT FOR UPDATE SKIP LOCKED**: As done in SHOP-402, optimize the inventory queries to use SELECT FOR UPDATE SKIP LOCKED to reduce the average query time from 2.3s to 0.15s.\n3. **Implement circuit breaker pattern for DB calls**: As suggested in SHOP-402, implement a circuit breaker pattern for DB calls to prevent cascading failures in case of connection pool exhaustion.\n4. **Automated sync mechanism for pg_hba.conf**: Implement an automated sync mechanism for pg_hba.conf between primary and secondary PostgreSQL instances to prevent stale configurations.\n5. **Redis-based inventory cache with write-through invalidation**: Consider implementing a Redis-based inventory cache with write-through invalidation to reduce the load on the PostgreSQL database.\n\n**Code Changes:**\n\n1. Update the inventory queries to use SELECT FOR UPDATE SKIP LOCKED.\n2. Implement the circuit breaker pattern for DB calls.\n3. Update the PgBouncer configuration to use transaction-level connection pooling.\n\n**Configuration Updates:**\n\n1. Increase the connection pool max to a higher value (e.g., 500) to handle sudden traffic spikes.\n2. Configure PgBouncer to use transaction-level connection pooling.\n3. Implement an automated sync mechanism for pg_hba.conf between primary and secondary PostgreSQL instances.\n\n**Load Testing:**\nBefore the next sale, perform a load test using k6 scripts to simulate heavy traffic and ensure that the connection pool is not exhausted.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies long-running queries as a root cause and proposes a solution to optimize them. However, it misses the Redis-based inventory cache with write-through invalidation and the auto-scaling issue, which are key points in the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "SHOP-402",
+          "LONG-101",
+          "LONG-201"
+        ],
+        "resolution": "Based on the historical tickets, I'll provide a suggested resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nThe root cause of the issue is the connection pool exhaustion under heavy traffic spikes. The PostgreSQL connection pool was fully utilized within minutes of the flash sale starting, causing cascading failures across all services. The average query time during the spike was 2+ seconds, which is significantly higher than the normal query time of <100ms.\n\n**Similarities with Historical Tickets:**\n\nThe issue is similar to Historical Ticket SHOP-402, where the connection pool was exhausted during the Black Friday flash sale. The root cause was long-running inventory check queries that held connections while waiting for row-level locks on popular items.\n\n**Applicable Fixes from Historical Tickets:**\n\n1. **Deploy PgBouncer for transaction-level connection pooling**: This was successfully deployed in front of PostgreSQL in Historical Ticket SHOP-402, and it handled 1000 concurrent connections with only 50 actual DB connections.\n2. **Optimize inventory queries with SELECT FOR UPDATE SKIP LOCKED**: This was implemented in Historical Ticket SHOP-402, and it reduced the average query time from 2.3s to 0.15s.\n3. **Implement circuit breaker pattern for DB calls**: This was suggested in Historical Ticket SHOP-402 to prevent cascading failures across services.\n\n**Additional Recommendations:**\n\n1. **Increase the connection pool size**: While increasing the pool size may provide temporary relief, it's essential to address the root cause of the issue. However, as a temporary measure, consider increasing the pool size to 500 or 1000 connections to see if it helps alleviate the issue.\n2. **Monitor query performance**: Continuously monitor query performance to identify any long-running queries that may be contributing to the connection pool exhaustion.\n3. **Implement a Redis-based inventory cache**: As suggested in Historical Ticket SHOP-402, consider implementing a Redis-based inventory cache with write-through invalidation to reduce the load on the database.\n4. **Load testing**: Perform load testing before the next flash sale event to ensure that the system can handle the expected traffic.\n\n**Code Changes:**\n\n1. **Update the connection pool configuration**: Update the connection pool configuration to use PgBouncer for transaction-level connection pooling.\n2. **Optimize inventory queries**: Update the inventory queries to use SELECT FOR UPDATE SKIP LOCKED to reduce the average query time.\n3. **Implement circuit breaker pattern**: Implement the circuit breaker pattern for DB calls to prevent cascading failures across services.\n\n**Configuration Updates",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and provides some correct fixes, but it misses the Redis-based inventory cache with write-through invalidation and the circuit breaker pattern is not fully implemented. The resolution does not fabricate any information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "SHOP-402",
+          "LONG-101",
+          "LONG-201"
+        ],
+        "resolution": "Based on the historical tickets provided, I will suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nThe root cause of the issue is the connection pool exhaustion under heavy traffic spike. The PostgreSQL connection pool was completely consumed within minutes, causing every service to time out. The issue is exacerbated by the fact that auto-scaling added more pods, which competed for DB connections.\n\n**Similar Historical Tickets:**\n\nHistorical Ticket SHOP-402 and LONG-101 provide relevant information for resolving this issue.\n\n**Resolution Strategy:**\n\nBased on the historical tickets, the following resolution strategy is suggested:\n\n1. **Deploy PgBouncer**: Deploy PgBouncer in front of PostgreSQL to handle connection pooling. This will help to reduce the number of actual DB connections required, improving performance under heavy traffic.\n2. **Optimize Inventory Queries**: Optimize inventory queries to reduce average query time from 2+ seconds to <100ms. This can be achieved by using SKIP LOCKED, which is a game-changer for high-contention scenarios.\n3. **Implement Automated pg_hba.conf Sync**: Implement automated pg_hba.conf sync between primary and failover using AWS Systems Manager Parameter Store. This will ensure that pg_hba.conf is up-to-date on both primary and failover instances.\n4. **Add PgBouncer Health Check**: Add a PgBouncer health check that detects stale connections and auto-restarts. This will help to prevent connection pool exhaustion due to stale connections.\n5. **Monitor Connection Pool**: Monitor the connection pool to detect any issues with connection exhaustion. This can be achieved by adding Prometheus metrics for connection pool size and adding alerts for connection pool exhaustion.\n6. **Health Checks**: Ensure that health checks verify connectivity for ALL service accounts, not just the health check user. This will help to detect connection issues earlier and prevent connection pool exhaustion.\n\n**Code Changes:**\n\nBased on Historical Ticket LONG-201, the following code changes are suggested:\n\n1. **Fix Leaks**: Fix the leaks in `order_processor.py` and `inventory_client.py` by changing class variables to instance variables and adding cleanup in finally blocks.\n2. **Add Prometheus Metrics**: Add Prometheus metrics for cache sizes to monitor cache growth and detect potential issues.\n\n**Configuration Updates:**\n\nBased on Historical Ticket LONG-101, the following configuration updates are suggested:\n\n1. **Update PgBouncer Config**: Update the PgBouncer config to set `server_login_retry = 3` and add `server_reconnect_timeout = 5` to enable automatic",
+        "scores": {
+          "correctness": 4,
+          "completeness": 3,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause and some of the key technical details, but misses the Redis-based inventory cache and circuit breaker pattern. The resolution also avoids fabricating information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "SHOP-402",
+          "SHOP-203",
+          "LONG-401"
+        ],
+        "resolution": "Based on the historical tickets provided, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** Connection pool exhaustion under heavy traffic spike due to high average query time and insufficient connection pool size.\n\n**Similar Historical Tickets:**\n\n- SHOP-402: Deployed PgBouncer in front of PostgreSQL, which handled 1000 concurrent connections with only 50 actual DB connections. This suggests that PgBouncer can help alleviate connection pool exhaustion.\n- SHOP-203: Optimized inventory queries using SKIP LOCKED, which reduced average query time from 2.3s to 0.15s. This suggests that query optimization can help reduce the load on the connection pool.\n- LONG-401: Analyzed failure patterns and identified that 429 errors (ES rejected execution) were the main problem, caused by the ES cluster's write thread pool filling up. This suggests that optimizing the ES cluster's write thread pool or implementing a circuit breaker can help prevent connection pool exhaustion.\n\n**Proposed Fix:**\n\n1. **Deploy PgBouncer:** Deploy PgBouncer in front of PostgreSQL to handle connection pooling. This will help alleviate connection pool exhaustion and improve performance.\n2. **Optimize Queries:** Optimize queries using SKIP LOCKED, as done in SHOP-203. This will help reduce average query time and reduce the load on the connection pool.\n3. **ES Cluster Optimization:** Optimize the ES cluster's write thread pool to prevent it from filling up during peak indexing times. This can be done by increasing the write thread pool size or implementing a circuit breaker to prevent excessive load.\n4. **Load Testing:** Perform load testing before the next sale event to ensure that the system can handle the expected traffic.\n\n**Code Changes:**\n\n- Deploy PgBouncer and configure it to handle connection pooling.\n- Update the inventory queries to use SKIP LOCKED.\n- Update the ES cluster's write thread pool configuration to prevent it from filling up during peak indexing times.\n- Implement a circuit breaker to prevent excessive load on the ES cluster.\n\n**Configuration Updates:**\n\n- Update the PostgreSQL connection pool size to a larger value (e.g., 500) to accommodate the expected traffic.\n- Update the ES cluster's write thread pool size to a larger value (e.g., 16) to prevent it from filling up during peak indexing times.\n- Configure the circuit breaker to prevent excessive load on the ES cluster.\n\n**Additional Recommendations:**\n\n- Implement size-based batching for bulk indexing, as done in LONG-401. This will help prevent excessive load",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause and proposes some of the key fix steps, but it misses the Redis-based inventory cache with write-through invalidation. The resolution also avoids fabricating information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "SHOP-402",
+          "LONG-101",
+          "SHOP-203"
+        ],
+        "resolution": "Based on the historical tickets, I'll provide a suggested resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nThe root cause of the connection pool exhaustion under heavy traffic spikes is likely due to long-running queries holding connections while waiting for row-level locks on popular items, similar to Historical Ticket SHOP-402. Additionally, the lack of automated sync mechanism for pg_hba.conf between primary and secondary instances, as seen in Historical Ticket LONG-101, might also contribute to the issue.\n\n**Action Items:**\n\n1. **Deploy PgBouncer for transaction-level connection pooling**: This has been done in the past (Historical Ticket SHOP-402) and has shown significant improvements. Ensure that PgBouncer is properly configured and deployed.\n2. **Optimize inventory queries with SELECT FOR UPDATE SKIP LOCKED**: This optimization has already been implemented (Historical Ticket SHOP-402) and has reduced average query time from 2.3s to 0.15s.\n3. **Implement automated sync mechanism for pg_hba.conf between primary and secondary instances**: This is a contributing factor in Historical Ticket LONG-101. Implement a mechanism to automatically sync pg_hba.conf between primary and secondary instances to prevent similar issues in the future.\n4. **Implement circuit breaker pattern for DB calls**: This has been suggested in Historical Ticket SHOP-402 to prevent cascading failures across services.\n5. **Load testing and monitoring**: Perform load testing before the next sale event to identify potential bottlenecks and monitor the system's performance during the event.\n\n**Additional Recommendations:**\n\n1. **Review and optimize database configuration**: Review the database configuration to ensure that it is optimized for high-traffic scenarios. This may include adjusting connection pool settings, query timeouts, and other configuration parameters.\n2. **Implement incremental indexing for Elasticsearch**: Historical Ticket SHOP-203 highlights the need for incremental indexing to reduce the time required for full rebuilds. Implement incremental indexing to ensure that search results are up-to-date in real-time.\n3. **Parallelize bulk indexing**: Historical Ticket SHOP-203 also highlights the need for parallelization of bulk indexing. Implement parallel bulk indexing to reduce the time required for full rebuilds.\n\n**Code Changes and Configuration Updates:**\n\n1. Update the database configuration to optimize for high-traffic scenarios.\n2. Implement automated sync mechanism for pg_hba.conf between primary and secondary instances.\n3. Update the circuit breaker pattern implementation to prevent cascading failures across services.\n4. Implement incremental indexing for Elasticsearch.\n5. Parallelize bulk indexing for Elasticsearch.",
+        "scores": {
+          "correctness": 3,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause of connection pool exhaustion and proposes some relevant fixes, but it misses the crucial implementation of a Redis-based inventory cache with write-through invalidation. The resolution also avoids fabricating information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "SHOP-402",
+          "LONG-301",
+          "LONG-101"
+        ],
+        "resolution": "Based on the historical tickets provided, I'll suggest a resolution for the new incoming ticket: \"Database connections exhausted under heavy traffic spike.\"\n\n**Root Cause Analysis:**\n\nFrom Historical Ticket SHOP-402, we know that long-running inventory check queries (avg 2.3s) hold connections while waiting for row-level locks on popular items. This caused the connection pool to be exhausted during the flash sale event.\n\n**Similarities with the New Incoming Ticket:**\n\nIn the new incoming ticket, we have a similar scenario where the PostgreSQL connection pool was completely consumed within minutes during the flash sale event, causing cascading failures across all services.\n\n**Applicable Fixes from Historical Tickets:**\n\n1. **Deploy PgBouncer for transaction-level connection pooling**: This was successfully implemented in Historical Ticket SHOP-402 and significantly improved the connection pool handling. We should ensure that PgBouncer is properly configured and deployed in front of the PostgreSQL instance.\n2. **Optimize inventory queries with SELECT FOR UPDATE SKIP LOCKED**: This optimization was also implemented in Historical Ticket SHOP-402 and reduced the average query time from 2.3s to 0.15s. We should review the inventory queries and optimize them using SELECT FOR UPDATE SKIP LOCKED to reduce the connection hold time.\n3. **Implement circuit breaker pattern for DB calls**: This was mentioned in Historical Ticket SHOP-402 as an action item. We should implement a circuit breaker pattern to detect when the database is under heavy load and prevent cascading failures.\n\n**Additional Recommendations:**\n\n1. **Implement rate limiting for public API**: Historical Ticket LONG-301 shows that rate limiting can help prevent overwhelming the API during sudden traffic spikes. We should implement rate limiting for the public API using a tiered approach based on customer plan type.\n2. **Monitor and alert on connection pool metrics**: We should monitor the connection pool metrics, such as connection queue backlog and average query time, and set up alerts to notify the on-call engineer when the connection pool is approaching capacity.\n3. **Review and optimize database configuration**: We should review the database configuration, including the connection pool size, and optimize it based on the traffic patterns and query performance.\n\n**Code Changes and Configuration Updates:**\n\n1. Update the database configuration to increase the connection pool size and optimize the connection pool settings.\n2. Deploy PgBouncer and configure it to handle transaction-level connection pooling.\n3. Optimize inventory queries using SELECT FOR UPDATE SKIP LOCKED.\n4. Implement a circuit breaker pattern for DB calls.\n5. Implement rate limiting for the",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause of the issue and applies fixes from historical tickets. However, it misses the Redis-based inventory cache with write-through invalidation and the implementation of a circuit breaker pattern is not fully detailed."
+        },
+        "retrieval_hit": true
+      }
+    },
+    "NEW-005": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "SHOP-503",
+          "SHOP-501",
+          "SHOP-102"
+        ],
+        "resolution": "Based on the historical tickets, I'll attempt to resolve the new incoming ticket.\n\n**Root Cause:** The order status emails stopped going out because the SendGrid API key was not updated in production after a rotation, similar to Historical Ticket SHOP-503.\n\n**Exact Fix:**\n\n1. Verify that order status change events are being published to RabbitMQ and notification service is consuming them.\n2. Check the SendGrid API logs for 403 Forbidden errors.\n3. Update the SendGrid API key in production to the new key, similar to Historical Ticket SHOP-503.\n\n**Code Changes:**\n\nNone required, as the fix is a configuration update.\n\n**Configuration Updates:**\n\n1. Update the SendGrid API key in the production environment to the new key.\n\n**Additional Recommendations:**\n\n1. As mentioned in Historical Ticket SHOP-501, it's essential to move secrets to HashiCorp Vault to prevent similar issues in the future.\n2. Consider implementing a mechanism to backfill missed notifications, similar to Historical Ticket SHOP-503.\n\n**Action Plan:**\n\n1. Update the SendGrid API key in production.\n2. Verify that order status emails are being sent successfully.\n3. Create a follow-up ticket to move secrets to HashiCorp Vault.\n\n**Estimated Time to Resolve:** 30 minutes to 1 hour.\n\n**Risks and Assumptions:**\n\n* The SendGrid API key rotation was the only change made recently.\n* The RabbitMQ and notification service are functioning correctly.\n* The SendGrid API key update will resolve the issue.\n\nIf the above steps do not resolve the issue, further investigation will be required to identify the root cause.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause and the exact fix, but it doesn't mention the backlogged emails that need to be resent. It also doesn't mention the plan to move secrets to HashiCorp Vault as part of the initial fix."
+        },
+        "retrieval_hit": true
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "SHOP-503",
+          "LONG-201",
+          "SHOP-102"
+        ],
+        "resolution": "Based on the historical tickets, I'll attempt to resolve the new incoming ticket.\n\n**Root Cause Analysis:**\n\nHistorical Ticket SHOP-503 indicates that order status emails stopped going out due to a 403 Forbidden error from SendGrid API calls. The root cause was a rotated SendGrid API key that was not updated in production.\n\nHistorical Ticket LONG-201 suggests that the order-processing-service is experiencing a memory leak, causing OOM kills every 48 hours. The memory leak is due to a class-level dict `_processing_cache` in the `OrderProcessor` class that is never cleared.\n\nHistorical Ticket SHOP-102 is unrelated to the issue at hand.\n\n**Resolution:**\n\n1. **Update SendGrid API Key:** Verify that the SendGrid API key is updated in production, just like in Historical Ticket SHOP-503.\n2. **Fix Memory Leak:** Update the `OrderProcessor` class to use an instance variable instead of a class variable for the `_processing_cache`. Clear the cache after processing each order to prevent the memory leak. This can be achieved by modifying the `process_order` method to remove the entry from the cache after processing.\n\n**Code Changes:**\n\n```python\nclass OrderProcessor:\n    def __init__(self):\n        self._processing_cache = {}  # Use instance variable instead of class variable\n\n    def process_order(self, order):\n        context = self._build_order_context(order)\n        self._processing_cache[order.id] = context  # Add entry to cache\n        # ... process order ...\n        del self._processing_cache[order.id]  # Clear cache after processing\n```\n\n**Configuration Updates:**\n\nNone required.\n\n**Verification:**\n\n1. Verify that the SendGrid API key is updated in production.\n2. Monitor the order-processing-service for memory leaks and OOM kills.\n3. Test the order status email functionality to ensure it is working correctly.\n\nBy following these steps, we should be able to resolve the issue of order status emails not going out due to a 403 Forbidden error from SendGrid API calls and prevent future memory leaks in the order-processing-service.",
+        "scores": {
+          "correctness": 3,
+          "completeness": 2,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the SendGrid API key issue but incorrectly attributes the root cause to a memory leak. The resolution also fails to mention re-sending backlogged emails and moving secrets to HashiCorp Vault, which are key points from the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "SHOP-503",
+          "SHOP-501",
+          "SHOP-102"
+        ],
+        "resolution": "Based on the historical tickets, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The order status emails stopped going out due to a 403 Forbidden error in SendGrid API calls. This is likely caused by an outdated SendGrid API key in the production environment.\n\n**Exact Fix:**\n\n1. **Verify SendGrid API key rotation**: Check if the SendGrid API key was rotated recently and if the new key was updated in the production environment.\n2. **Update SendGrid API key in prod**: If the new key was not updated in prod, update it immediately to resolve the 403 Forbidden error.\n3. **Backlog and resend missed notifications**: If there are any missed notifications, queue them up and resend them to customers.\n\n**Code Changes and Configuration Updates:**\n\n1. **Review SendGrid API key usage**: Ensure that the SendGrid API key is used consistently across the application and that it's not hardcoded in multiple places.\n2. **Consider moving secrets to HashiCorp Vault**: As mentioned in SHOP-503, moving secrets to HashiCorp Vault can help prevent similar issues in the future.\n\n**Additional Recommendations:**\n\n1. **Verify status mapping**: Double-check the status mapping to ensure that it's correct and up-to-date.\n2. **Review error handling**: Review the error handling for PayPal (PP) error codes to ensure that it's properly implemented and catching any potential issues.\n\n**Action Items:**\n\n1. Update the SendGrid API key in the production environment.\n2. Resend any missed notifications to customers.\n3. Review and update the status mapping if necessary.\n4. Consider moving secrets to HashiCorp Vault to prevent similar issues in the future.\n\nBy following these steps, we should be able to resolve the issue with order status emails not going out and prevent similar issues from occurring in the future.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and provides a step-by-step fix that matches the ground truth. It also includes additional recommendations that are relevant to the issue."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "SHOP-503",
+          "SHOP-501",
+          "LONG-401"
+        ],
+        "resolution": "Based on the historical tickets provided, I will attempt to suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nFrom Historical Ticket SHOP-503, it appears that the root cause of the issue is related to SendGrid API key not being updated in production after a rotation. This resulted in 403 Forbidden errors when trying to send order status emails.\n\nHowever, since the issue started a few days ago, it's possible that there might be another root cause at play. Historical Ticket LONG-401 provides some insights into potential issues with the Elasticsearch (ES) cluster, such as 429 errors due to peak indexing times, 409 version conflicts, and 400 mapper parsing exceptions. However, these issues seem to be related to the bulk indexing process and might not be directly related to the order status emails.\n\n**Resolution:**\n\nGiven the information from Historical Ticket SHOP-503, the first step would be to verify that the SendGrid API key is correctly updated in production. If it is, then we might need to investigate further to determine the root cause of the issue.\n\nHere are some potential steps to resolve the issue:\n\n1. **Verify SendGrid API key:** Check if the SendGrid API key is correctly updated in production. If not, update it immediately.\n2. **Check RabbitMQ and notification service:** Verify that order status change events are being published to RabbitMQ and that the notification service is consuming them correctly.\n3. **Check SendGrid API calls:** Investigate why SendGrid API calls are failing with 403 Forbidden errors. This might involve checking the SendGrid API logs or contacting their support team for assistance.\n4. **Backlog and retry:** If there are any missed notifications, create a script to resend them.\n\nIf the above steps do not resolve the issue, we might need to investigate further to determine the root cause. Historical Ticket LONG-401 provides some insights into potential issues with the ES cluster, but these might not be directly related to the order status emails.\n\n**Code Changes and Configuration Updates:**\n\nBased on Historical Ticket LONG-401, there are some proposed fixes for the bulk indexer.py script. However, these changes seem to be related to the bulk indexing process and might not be directly applicable to the order status emails.\n\nIf we decide to implement the proposed fixes, we would need to carefully review the changes and ensure that they do not introduce any new issues.\n\n**Conclusion:**\n\nBased on the historical tickets provided, the most likely root cause of the issue is related to the SendGrid API key not being",
+        "scores": {
+          "correctness": 3,
+          "completeness": 2,
+          "hallucination": 4,
+          "reasoning": "The suggested resolution correctly identifies the potential root cause of the issue as related to the SendGrid API key, but it does not accurately capture the specific issue of the key being rotated but not updated in production. The resolution also introduces some unsupported claims, such as the need to investigate further if the SendGrid API key is correctly updated, which is not necessary according to the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "SHOP-503",
+          "SHOP-501",
+          "LONG-201"
+        ],
+        "resolution": "Based on the historical tickets, I'll attempt to resolve the new incoming ticket.\n\n**Root Cause:** Order status emails stopped going out due to SendGrid API key not being updated in production after rotation.\n\n**Exact Fix:**\n\n1. Check if the SendGrid API key was rotated recently.\n2. Verify if the new key was updated in staging but not in production.\n3. Update the SendGrid API key in production to the new key.\n\n**Code Changes:** None required, as this is a configuration update.\n\n**Configuration Updates:**\n\n1. Update the SendGrid API key in the production environment to the new key.\n\n**Additional Steps:**\n\n1. Check if there are any backlogged order status emails that need to be resent.\n2. If yes, queue up the missed notifications for the last few days and send them out.\n\n**Why this fix works:** The historical ticket SHOP-503 shows that updating the SendGrid API key in production resolved the issue of order status emails not being sent. This is because the SendGrid API key was not updated in production after rotation, causing the API calls to fail with a 403 Forbidden error.\n\n**Why this fix is relevant:** The new incoming ticket has similar symptoms (order status emails stopped going out) and the root cause is likely the same (SendGrid API key not updated in production). By applying the fix from the historical ticket SHOP-503, we can resolve the issue.\n\n**Note:** If the issue persists after updating the SendGrid API key, we may need to investigate further to identify other potential causes.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and the exact fix, but it lacks the additional step of re-sending backlogged emails. The resolution also correctly grounds itself in historical tickets without fabricating any information."
+        },
+        "retrieval_hit": true
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "SHOP-503",
+          "SHOP-501",
+          "SHOP-102"
+        ],
+        "resolution": "Based on the historical tickets, I'll attempt to resolve the new incoming ticket.\n\n**Root Cause:** The order status emails stopped going out due to a 403 Forbidden error in SendGrid API calls. This is likely caused by an outdated SendGrid API key in production.\n\n**Exact Fix:**\n\n1. Check if the SendGrid API key was rotated recently and if the new key was updated in production.\n2. If the new key was not updated, update the SendGrid API key in production to the latest one.\n3. Verify that the SendGrid API key is correctly configured in the notification service.\n\n**Code Changes:**\n\nNone required, as the issue is likely due to a configuration issue rather than a code bug.\n\n**Configuration Updates:**\n\n1. Update the SendGrid API key in production to the latest one.\n2. Consider moving secrets to HashiCorp Vault as suggested in Historical Ticket SHOP-503 to prevent similar issues in the future.\n\n**Additional Steps:**\n\n1. Verify that order status change events are being published to RabbitMQ and notification service is consuming them.\n2. Check the SendGrid API logs for any errors or issues that may have caused the 403 Forbidden error.\n3. If the issue persists, investigate further to determine the root cause and take corrective action.\n\n**Similarity to Historical Tickets:**\n\nThis issue is similar to Historical Ticket SHOP-503, where the SendGrid API key was not updated in production, causing order status emails to stop going out. The resolution steps outlined above are based on the resolution of that historical ticket.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and provides a step-by-step fix, but it doesn't mention the API calls failing with a 403 Forbidden error. It also doesn't explicitly mention re-sending backlogged emails."
+        },
+        "retrieval_hit": true
+      }
+    },
+    "NEW-006": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "SHOP-601",
+          "LONG-401",
+          "SHOP-402"
+        ],
+        "resolution": "Based on the historical tickets, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The issue is a classic example of a race condition, where two concurrent requests can both read the same inventory count, both see sufficient stock, and both decrement, resulting in a negative inventory count.\n\n**Similar Historical Tickets:**\n\n- SHOP-601: Overselling bug due to a race condition in the inventory service. The fix involved using an atomic UPDATE with a WHERE clause to ensure that the decrement operation is atomic.\n- LONG-401: Search indexing pipeline drops documents silently due to a similar issue with Elasticsearch's bulk API returning partial failures. The fix involved checking the individual document statuses in the response.\n- SHOP-402: DB connection pool exhausted during Black Friday flash sale. The root cause was long-running inventory check queries holding connections while waiting for row-level locks on popular items.\n\n**Resolution:**\n\n1. **Atomic UPDATE with WHERE clause:** Update the inventory check and decrement code to use an atomic UPDATE with a WHERE clause, similar to the fix in SHOP-601:\n```python\nresult = db.execute(\n    \"UPDATE inventory SET count = count - 1 WHERE sku = %s AND count > 0\", sku\n)\nif result.rowcount == 0:\n    raise OutOfStockError()\n```\n2. **Redis-based inventory cache:** Implement a Redis-based inventory cache with write-through invalidation, similar to the suggestion in SHOP-402. This will help reduce the load on the database and prevent the connection pool from being exhausted.\n3. **Optimize inventory queries:** Optimize the inventory queries to use SELECT FOR UPDATE SKIP LOCKED, similar to the fix in SHOP-402. This will help reduce the contention on popular items and improve the performance of the inventory queries.\n4. **Circuit breaker pattern:** Implement a circuit breaker pattern for DB calls, similar to the suggestion in SHOP-402. This will help prevent cascading failures in case of a database connection pool exhaustion.\n\n**Code Changes:**\n\nUpdate the inventory check and decrement code to use the atomic UPDATE with a WHERE clause:\n```python\ndef decrement_inventory(sku):\n    result = db.execute(\n        \"UPDATE inventory SET count = count - 1 WHERE sku = %s AND count > 0\", sku\n    )\n    if result.rowcount == 0:\n        raise OutOfStockError()\n```\nImplement a Redis-based inventory cache with write-through invalidation:\n```python\nimport redis\n\nredis_client = redis.Redis(host='localhost',",
+        "scores": {
+          "correctness": 5,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the root cause and provides a correct technical solution to the race condition issue. However, it misses the DB constraint CHECK (count >= 0) and the Redis-based inventory reservation with TTL-based expiry, which are key points from the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "SHOP-601",
+          "LONG-401",
+          "SHOP-402"
+        ],
+        "resolution": "Based on the historical tickets, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The issue is a classic example of a race condition, where two concurrent requests can both read the same inventory count, both see sufficient stock, and both decrement, resulting in a negative inventory count.\n\n**Similar Historical Tickets:**\n\n- **SHOP-601**: Overselling bug due to a race condition in the inventory service. The fix used an atomic UPDATE with a WHERE clause to ensure that only one request can decrement the inventory count.\n- **SHOP-402**: DB connection pool exhaustion during a Black Friday flash sale. The root cause was long-running inventory check queries holding connections while waiting for row-level locks on popular items.\n\n**Resolution:**\n\n1. **Atomic UPDATE with WHERE clause:** Update the inventory check and decrement logic to use an atomic UPDATE with a WHERE clause, similar to the fix in SHOP-601:\n```python\nresult = db.execute(\n    \"UPDATE inventory SET count = count - 1 WHERE sku = %s AND count > 0\", sku\n)\nif result.rowcount == 0:\n    raise OutOfStockError()\n```\nThis ensures that only one request can decrement the inventory count, preventing the race condition.\n\n2. **Optimize inventory queries:** To reduce the load on the database and prevent connection pool exhaustion, optimize the inventory queries using `SELECT FOR UPDATE SKIP LOCKED`, as mentioned in SHOP-402. This can help reduce the average query time from 2.3s to 0.15s.\n3. **Implement Redis-based inventory cache:** Consider implementing a Redis-based inventory cache with write-through invalidation, as suggested in SHOP-402. This can help reduce the load on the database and improve performance during high-traffic periods.\n\n**Additional Recommendations:**\n\n- **Load testing:** Perform load testing before the next sale to ensure that the system can handle the expected traffic.\n- **Circuit breaker pattern:** Implement a circuit breaker pattern for DB calls to prevent cascading failures in case of a connection pool exhaustion or other database issues.\n\nBy implementing these changes, you should be able to resolve the issue and prevent similar problems in the future.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately describes the root cause of the issue, correctly identifies the necessary fixes, and provides a clear implementation plan. The resolution also avoids fabricating information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "SHOP-601",
+          "SHOP-402",
+          "LONG-401"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The root cause of the issue is a race condition in the inventory check and decrement process, where concurrent requests read the count as 1 and both succeed, resulting in a negative inventory count.\n\n**Fixes from Historical Tickets:**\n\n1. **Atomic UPDATE fix:** Deploy the atomic UPDATE fix, which was previously deployed in SHOP-601. This fix ensures that the inventory check and decrement are performed as a single, atomic operation.\n2. **DB constraint:** Add a DB constraint to ensure that the inventory count is always non-negative. This constraint was previously added in SHOP-601.\n3. **Redis for inventory reservation:** Consider using Redis for inventory reservation with TTL-based expiry for unpaid reservations, as suggested in SHOP-601. This approach can help prevent concurrent requests from accessing the same inventory item.\n4. **PgBouncer:** Deploy PgBouncer in front of PostgreSQL to handle high concurrency and reduce the number of actual DB connections. This was previously done in SHOP-402.\n5. **Inventory query optimization:** Optimize the inventory query to reduce its execution time. This was previously done in SHOP-402, where the average query time was reduced from 2.3s to 0.15s using SKIP LOCKED.\n6. **Load testing:** Perform a load test before the next sale to ensure that the system can handle high traffic. This was previously suggested in SHOP-402.\n\n**Code Changes:**\n\n1. **Use atomic UPDATE:** Update the inventory check and decrement code to use an atomic UPDATE statement, similar to the one deployed in SHOP-601.\n2. **Use Redis for inventory reservation:** Implement Redis-based inventory reservation with TTL-based expiry for unpaid reservations, as suggested in SHOP-601.\n3. **Size-based batching:** Implement size-based batching for bulk indexing, similar to the changes proposed in LONG-401. This will help prevent large bulk requests from causing circuit breaker exceptions.\n\n**Configuration Updates:**\n\n1. **DB constraint:** Add a DB constraint to ensure that the inventory count is always non-negative.\n2. **PgBouncer:** Configure PgBouncer to handle high concurrency and reduce the number of actual DB connections.\n3. **Redis:** Configure Redis for inventory reservation with TTL-based expiry for unpaid reservations.\n\n**Additional Recommendations:**\n\n1. **Monitor inventory levels:** Monitor inventory levels closely during peak sales periods to prevent similar issues from occurring.\n2. **Implement retry mechanisms:** Implement retry mechanisms for inventory",
+        "scores": {
+          "correctness": 4,
+          "completeness": 3,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause of the issue and proposes fixes from historical tickets. However, it misses the key point of using a WHERE clause in the UPDATE statement to check for the count being greater than 0, and also does not mention the CHECK constraint on the DB to ensure count is non-negative."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "SHOP-601",
+          "LONG-201",
+          "SHOP-402"
+        ],
+        "resolution": "Based on the historical tickets, I'll suggest a resolution for the new incoming ticket.\n\n**Root Cause:** The issue is a classic example of a race condition, where two concurrent requests read the inventory count as 1 and both succeed in decrementing it, resulting in a negative count.\n\n**Exact Fix:** To fix this issue, we need to ensure that the inventory check and decrement operations are atomic. We can achieve this by using a database transaction or a lock to prevent concurrent access.\n\n**Code Changes:**\n\n1. Wrap the inventory check and decrement operations in a database transaction:\n```python\nwith db.transaction():\n    count = db.query('SELECT count FROM inventory WHERE sku = %s', sku)\n    if count > 0:\n        db.execute('UPDATE inventory SET count = count - 1 WHERE sku = %s', sku)\n```\n2. Alternatively, use a lock to prevent concurrent access:\n```python\nimport threading\n\nlock = threading.Lock()\n\ndef decrement_inventory(sku):\n    with lock:\n        count = db.query('SELECT count FROM inventory WHERE sku = %s', sku)\n        if count > 0:\n            db.execute('UPDATE inventory SET count = count - 1 WHERE sku = %s', sku)\n```\n**Configuration Updates:**\n\n1. Consider using Redis for inventory reservation with TTL-based expiry for unpaid reservations, as suggested in Historical Ticket SHOP-601.\n2. Deploy PgBouncer in front of PostgreSQL to handle high concurrent connections, as done in Historical Ticket SHOP-402.\n3. Optimize inventory queries using SKIP LOCKED, as done in Historical Ticket SHOP-402.\n\n**Additional Recommendations:**\n\n1. Implement a load test before the next sale to ensure that the system can handle high traffic.\n2. Monitor the system's performance and adjust the configuration as needed to prevent similar issues in the future.\n3. Consider adding a Prometheus metric to track the inventory count and alert if it falls below a certain threshold.\n\n**Code Review:**\n\nThe code changes should be reviewed to ensure that they are correct and efficient. The use of a database transaction or a lock should be carefully evaluated to ensure that it does not introduce any performance bottlenecks.\n\n**Testing:**\n\nThe code changes should be thoroughly tested to ensure that they fix the issue and do not introduce any new problems. The tests should cover various scenarios, including concurrent access and high traffic.",
+        "scores": {
+          "correctness": 3,
+          "completeness": 2,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause of the issue as a race condition, but it does not accurately capture the ground truth's atomic UPDATE with WHERE clause solution. The resolution also introduces some unrelated suggestions, such as using Redis for inventory reservation and deploying PgBouncer, which are not directly related to the issue at hand."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "SHOP-601",
+          "SHOP-402",
+          "SHOP-602"
+        ],
+        "resolution": "Based on the historical tickets, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The issue is a classic example of a race condition in the inventory service, where concurrent requests can both read the same inventory count, both see sufficient stock, and both decrement, resulting in a negative inventory count.\n\n**Exact Fix:** The fix from Historical Ticket SHOP-601 should be applied, which uses an atomic UPDATE statement with a WHERE clause to ensure that only one request can decrement the inventory count at a time.\n\n```python\nresult = db.execute(\n    \"UPDATE inventory SET count = count - 1 WHERE sku = %s AND count > 0\", sku\n)\nif result.rowcount == 0:\n    raise OutOfStockError()\n```\n\n**Additional Recommendations:**\n\n1. **DB Connection Pooling:** To prevent connection pool exhaustion during high-traffic events, deploy PgBouncer for transaction-level connection pooling, as recommended in Historical Ticket SHOP-402.\n2. **Inventory Query Optimization:** Optimize inventory queries with SELECT FOR UPDATE SKIP LOCKED, as done in Historical Ticket SHOP-402, to reduce the average query time from 2.3s to 0.15s.\n3. **Redis-based Inventory Cache:** Consider implementing a Redis-based inventory cache with write-through invalidation, as suggested in Historical Ticket SHOP-402, to improve performance and reduce the load on the database.\n4. **Circuit Breaker Pattern:** Implement a circuit breaker pattern for DB calls, as recommended in Historical Ticket SHOP-402, to prevent cascading failures in case of a database connection issue.\n5. **Load Testing:** Perform load testing before the next sale, as suggested in Historical Ticket SHOP-402, to ensure that the system can handle the expected traffic.\n\n**Additional Considerations:**\n\n1. **Low Stock Alerts and Automatic Reorder:** Consider implementing low stock alerts and automatic reorder suggestions, as described in Historical Ticket SHOP-602, to improve inventory management and reduce stockout incidents.\n2. **Supplier API Integration:** Phase 2 of the low stock alerts and automatic reorder feature should include supplier API integration for automated PO creation, as mentioned in Historical Ticket SHOP-602.\n\nBy applying these fixes and recommendations, you should be able to resolve the issue of concurrent requests decrementing the inventory count and prevent negative inventory counts.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause and provides a fix based on historical ticket SHOP-601. However, it misses the additional key points from the ground truth, such as using a DB constraint CHECK (count >= 0) and considering Redis-based inventory reservation with TTL-based expiry."
+        },
+        "retrieval_hit": true
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "SHOP-601",
+          "LONG-401",
+          "SHOP-204"
+        ],
+        "resolution": "Based on the historical tickets, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The current inventory check and decrement is not atomic, leading to a race condition where two concurrent requests can both read the same inventory count, both see sufficient stock, and both decrement, resulting in a negative inventory count.\n\n**Fix:** Use an atomic UPDATE statement with a WHERE clause to ensure that only one request can decrement the inventory count at a time. This fix was previously deployed in Historical Ticket SHOP-601.\n\n```python\nresult = db.execute(\n    \"UPDATE inventory SET count = count - 1 WHERE sku = %s AND count > 0\", sku\n)\nif result.rowcount == 0:\n    raise OutOfStockError()\n```\n\nAdditionally, consider adding a DB constraint to ensure that the inventory count is always non-negative.\n\n```sql\nALTER TABLE inventory ADD CONSTRAINT positive_count CHECK (count >= 0)\n```\n\n**Configuration Update:** Consider using Redis for inventory reservation with TTL-based expiry for unpaid reservations, especially for flash sales, as suggested in Historical Ticket SHOP-601.\n\n**Code Change:** Update the inventory management code to use the atomic UPDATE statement and DB constraint.\n\n**Testing:** Verify that the fix resolves the issue by testing with concurrent requests and ensuring that the inventory count remains accurate.\n\n**Monitoring:** Monitor the inventory management system to detect any future issues and adjust the configuration or code as needed.\n\nNote: The historical tickets do not provide a direct solution for the Elasticsearch indexing issue in Historical Ticket LONG-401, but the root cause analysis and affected code are relevant to understanding the problem. However, the solution for the Elasticsearch indexing issue is not directly applicable to the current ticket.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the root cause of the issue, provides a correct fix using an atomic UPDATE statement, and includes additional suggestions for improvement. The resolution also correctly references historical tickets for context and justification."
+        },
+        "retrieval_hit": true
+      }
+    },
+    "NEW-007": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "SHOP-701",
+          "LONG-501",
+          "LONG-301"
+        ],
+        "resolution": "Based on the historical tickets provided, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The synchronous database INSERT on every request in the request logging middleware is blocking the response, causing API latency to double.\n\n**Similar Historical Tickets:**\n\n1. **SHOP-701**: This ticket has a similar issue where the audit logging middleware was causing API latency to increase by 3-4x. The solution was to implement option 2 - publishing to a message queue (RabbitMQ) and consuming asynchronously.\n2. **LONG-501**: This ticket is unrelated to the issue at hand, but it does mention implementing an OAuth 2.0 authorization server with a message queue (RabbitMQ) for token storage and processing.\n3. **LONG-301**: This ticket is also unrelated, but it does mention implementing rate limiting with a Redis backend, which could be useful in this scenario.\n\n**Resolution:**\n\nBased on the historical tickets, I recommend implementing option 2 - publishing to a message queue (RabbitMQ) and consuming asynchronously. This will allow the logging middleware to write to the message queue without blocking the response.\n\n**Code Changes:**\n\n1. Modify the logging middleware to publish log messages to a RabbitMQ message queue instead of writing directly to the database.\n2. Create a separate consumer that reads from the message queue and writes to the database asynchronously.\n\n**Configuration Updates:**\n\n1. Configure RabbitMQ to handle the message queue.\n2. Update the logging middleware to use the RabbitMQ message queue.\n3. Update the consumer to read from the message queue and write to the database asynchronously.\n\n**Example Code:**\n\n```javascript\n// logging middleware\nconst { createClient } = require('amqplib');\n\nconst rabbitMQUrl = 'amqp://localhost';\nconst exchangeName = 'logs';\n\nconst rabbitMQClient = createClient(rabbitMQUrl);\n\nasync function logMessage(message) {\n  const channel = await rabbitMQClient.createChannel();\n  await channel.assertExchange(exchangeName, 'fanout', { durable: false });\n  await channel.publish(exchangeName, '', Buffer.from(message));\n}\n\n// consumer\nconst { createClient } = require('amqplib');\n\nconst rabbitMQUrl = 'amqp://localhost';\nconst exchangeName = 'logs';\n\nconst rabbitMQClient = createClient(rabbitMQUrl);\n\nasync function consumeLogs() {\n  const channel = await rabbitMQClient.createChannel();\n  await channel.assertExchange(exchangeName, 'fanout', { durable: false });",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and proposes a correct solution based on historical tickets. It also includes all key steps from the ground truth, making it a comprehensive and accurate resolution."
+        },
+        "retrieval_hit": true
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "SHOP-701",
+          "SHOP-403",
+          "SHOP-702"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The synchronous database INSERT on every request in the request logging middleware is blocking the response, causing API latency to double.\n\n**Exact Fix:** Implement option 2 from Historical Ticket SHOP-701, which is publishing to a message queue (RabbitMQ) and consuming asynchronously. This will allow the logging middleware to write logs without blocking the response.\n\n**Code Changes:**\n\n1. Modify the request logging middleware to publish log events to a RabbitMQ exchange instead of performing a synchronous database INSERT.\n2. Create a separate consumer that listens to the RabbitMQ exchange and writes the log events to the audit_log table asynchronously.\n\n**Configuration Updates:**\n\n1. Configure RabbitMQ to handle the log events published by the middleware.\n2. Configure the consumer to connect to RabbitMQ and consume the log events.\n3. Update the database configuration to handle the asynchronous writes from the consumer.\n\n**Additional Recommendations:**\n\n1. Consider implementing a dead-letter queue (DLQ) to handle any log events that fail to be processed by the consumer.\n2. Monitor the performance of the consumer and adjust the batch size or processing frequency as needed to ensure that log events are being processed in a timely manner.\n\n**Prioritization:** This fix should be prioritized as high, as it is affecting all customers and has a significant impact on API latency.\n\n**Rationale:** The solution from Historical Ticket SHOP-701 has already been proven to be effective in reducing API latency, and it aligns with the recommended approach of using a message queue to handle asynchronous processing. By implementing this solution, we can ensure that log events are being written to the audit_log table without blocking the response, and we can maintain the performance and reliability of our API.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the ground truth, covering all key fix steps and technical details. It also avoids fabricating any information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "SHOP-701",
+          "SHOP-303",
+          "SHOP-1103"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The synchronous database INSERT on every request by the request logging middleware is blocking the response, causing API latency to double.\n\n**Resolution:**\n\n1. **Publish logs to a message queue (RabbitMQ):** As seen in SHOP-701, publishing logs to a message queue and having a separate consumer write to the audit_log table is an effective solution. This will allow the API to respond quickly without blocking on database inserts.\n\n2. **Implement async logging consumer:** Create a separate process or thread that consumes logs from the message queue and writes them to the audit_log table. This can be done using a library like Celery or a message queue consumer like RabbitMQ's built-in consumer.\n\n3. **Configure logging middleware to publish logs:** Update the logging middleware to publish logs to the message queue instead of writing directly to the database.\n\n**Code Changes:**\n\n* Update the logging middleware to use a message queue client library (e.g., Pika for RabbitMQ) to publish logs to the message queue.\n* Create a new consumer process or thread that consumes logs from the message queue and writes them to the audit_log table.\n\n**Configuration Updates:**\n\n* Update the logging middleware configuration to use the message queue instead of the database.\n* Configure the message queue consumer to write logs to the audit_log table with a suitable delay (e.g., ~1s).\n\n**Additional Considerations:**\n\n* Review the logging middleware's configuration to ensure it's not logging unnecessary data, which could impact performance.\n* Consider implementing rate limiting or other security measures to prevent abuse of the logging system.\n\n**Historical Ticket SHOP-303 and SHOP-1103 are not directly relevant to this issue, but they provide useful context on other aspects of the system's configuration and security.**",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately reflects the ground truth, covering all key points and avoiding any fabrication of information not supported by the historical tickets. The suggested resolution is a direct copy of the ground truth, with no modifications or additions."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "SHOP-701",
+          "LONG-401",
+          "SHOP-1001"
+        ],
+        "resolution": "Based on the historical tickets, I'll suggest a resolution for the new incoming ticket.\n\n**Root Cause:** The synchronous database INSERT in the request logging middleware is blocking the response, causing API latency to double.\n\n**Similar Historical Tickets:**\n\n1. **SHOP-701**: This ticket suggests using RabbitMQ to publish logs asynchronously, which brought p50 back down to 52ms. We can apply a similar approach here.\n2. **LONG-401**: This ticket provides insights into the root cause of bulk API requests failing due to ES cluster write thread pool filling up. Although this ticket is not directly related to the current issue, it provides valuable information on how to handle errors and implement size-based batching.\n\n**Proposed Fix:**\n\n1. **Publish logs asynchronously using RabbitMQ**: Similar to SHOP-701, we can publish logs to RabbitMQ instead of performing a synchronous database INSERT. This will allow the API to respond quickly, and a separate consumer can process the logs asynchronously.\n2. **Implement size-based batching**: Similar to LONG-401, we can implement size-based batching to prevent large bulk requests from overwhelming the ES cluster. We can accumulate documents until the batch size hits 50MB, as suggested in LONG-401.\n3. **Retry failed documents**: We can also implement retry logic for failed documents, similar to LONG-401. This will help reduce the number of permanent failures and improve overall API performance.\n\n**Code Changes:**\n\n1. **Publish logs to RabbitMQ**: We'll need to modify the request logging middleware to publish logs to RabbitMQ instead of performing a synchronous database INSERT.\n2. **Implement size-based batching**: We'll need to modify the bulk indexing code to use size-based batching instead of fixed 500-document batches.\n3. **Retry failed documents**: We'll need to modify the bulk indexing code to retry failed documents with a backoff strategy.\n\n**Configuration Updates:**\n\n1. **RabbitMQ configuration**: We'll need to configure RabbitMQ to receive logs from the request logging middleware.\n2. **ES cluster configuration**: We'll need to configure the ES cluster to handle size-based batching and retry failed documents.\n\n**Example Code:**\n```python\n# Request logging middleware\nimport pika\n\ndef log_request(request):\n    # Publish log to RabbitMQ\n    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))\n    channel = connection.channel()\n    channel.basic_publish(exchange='',\n                          routing_key='logs',\n                          body=request.log_data)\n    connection.close()\n\n# Bulk indexing code",
+        "scores": {
+          "correctness": 4,
+          "completeness": 2,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause of the issue and proposes a solution to publish logs asynchronously using RabbitMQ. However, it introduces unnecessary complexity by suggesting size-based batching and retry logic, which are not present in the ground truth resolution."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "SHOP-701",
+          "SHOP-101",
+          "SHOP-404"
+        ],
+        "resolution": "Based on the historical tickets, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The synchronous database INSERT on every request in the request logging middleware is blocking the response, causing API latency to double.\n\n**Exact Fix:** Implement option 2 from Historical Ticket SHOP-701, which is publishing to a message queue (RabbitMQ) and consuming asynchronously. This will allow the logging middleware to write logs without blocking the response.\n\n**Code Changes:**\n\n1. Modify the request logging middleware to publish log data to RabbitMQ instead of performing a synchronous database INSERT.\n2. Create a separate consumer that reads log data from RabbitMQ and writes it to the audit_log table asynchronously.\n\n**Configuration Updates:**\n\n1. Configure RabbitMQ to handle log data from the request logging middleware.\n2. Configure the consumer to read log data from RabbitMQ and write it to the audit_log table at a suitable interval (e.g., every 5 seconds).\n\n**Additional Recommendations:**\n\n1. Consider implementing a buffer in memory to handle log data before flushing it to the audit_log table in batches. This can help prevent log data loss in case of a crash.\n2. Monitor the performance of the logging middleware and the consumer to ensure that they are not introducing additional latency or errors.\n\n**Prioritization:** This fix should be prioritized as high, as it is affecting all customers and causing significant performance issues.\n\n**Code Snippets:**\n\nHere is an example of how the request logging middleware could be modified to publish log data to RabbitMQ:\n```python\nimport logging\nimport pika\n\nlogger = logging.getLogger(__name__)\n\ndef log_request(request):\n    # Create a log message\n    log_message = {\n        'request_id': request.id,\n        'method': request.method,\n        'url': request.url,\n        # ...\n    }\n\n    # Publish the log message to RabbitMQ\n    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))\n    channel = connection.channel()\n    channel.basic_publish(exchange='',\n                          routing_key='log_queue',\n                          body=log_message)\n    connection.close()\n```\nAnd here is an example of how the consumer could be implemented to read log data from RabbitMQ and write it to the audit_log table:\n```python\nimport pika\nimport logging\n\nlogger = logging.getLogger(__name__)\n\ndef consume_log_data():\n    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))\n    channel = connection.channel()\n    channel.queue_declare(queue='log_queue')\n\n    def callback(ch",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause of the issue, proposes the correct fix, and outlines the necessary code and configuration changes. It also includes additional recommendations to improve the logging system's reliability and performance."
+        },
+        "retrieval_hit": true
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "SHOP-701",
+          "LONG-301",
+          "LONG-101"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The synchronous database INSERT on every request in the request logging middleware is blocking the response, causing API latency to double.\n\n**Similar Historical Tickets:**\n\n1. **SHOP-701**: This ticket has a similar issue where the audit logging middleware was causing API latency to increase by 3-4x. The solution was to implement option 2 - publishing to a message queue (RabbitMQ) and consuming asynchronously.\n2. **LONG-301**: This ticket is unrelated to the issue at hand, but it does mention implementing a custom Kong plugin with Redis for rate limiting. However, it does not provide any relevant information for resolving the current issue.\n\n**Resolution:**\n\nBased on the historical ticket **SHOP-701**, I recommend implementing option 2 - publishing to a message queue (RabbitMQ) and consuming asynchronously. This will allow the logging middleware to write to the message queue without blocking the response, and a separate consumer can process the logs asynchronously.\n\n**Code Changes:**\n\n1. Modify the logging middleware to publish logs to a RabbitMQ message queue instead of writing directly to the database.\n2. Create a separate consumer that reads from the message queue and writes to the database asynchronously.\n\n**Configuration Updates:**\n\n1. Configure RabbitMQ to handle the message queue and ensure that the consumer is properly set up to read from the queue.\n2. Update the logging middleware to use the RabbitMQ connection details.\n\n**Example Code:**\n\n```python\nimport pika\n\n# RabbitMQ connection details\nRABBITMQ_HOST = 'localhost'\nRABBITMQ_PORT = 5672\nRABBITMQ_QUEUE = 'logs'\n\n# Create a RabbitMQ connection\nconnection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT))\nchannel = connection.channel()\n\n# Declare the queue\nchannel.queue_declare(queue=RABBITMQ_QUEUE)\n\n# Define a callback function to handle log messages\ndef callback(ch, method, properties, body):\n    # Write the log message to the database\n    # ...\n\n# Start consuming from the queue\nchannel.basic_consume(queue=RABBITMQ_QUEUE, on_message_callback=callback, no_ack=True)\n\n# Start the consumer\nchannel.start_consuming()\n```\n\n**Note:** This is a simplified example and may require additional modifications to fit your specific use case.",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause, references a similar historical ticket with a correct solution, and provides a step-by-step guide to implement the fix. The code example is also correct and aligns with the ground truth resolution."
+        },
+        "retrieval_hit": true
+      }
+    },
+    "NEW-008": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "LONG-101",
+          "SHOP-402",
+          "LONG-401"
+        ],
+        "resolution": "Based on the historical tickets provided, I will suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nThe root cause of the issue is the stale authentication config on the secondary node after the RDS Multi-AZ failover. This is similar to Historical Ticket LONG-101, where the failover node had a different `pg_hba.conf` configuration.\n\n**Similarities with Historical Tickets:**\n\n1. **Stale authentication config:** In LONG-101, the secondary node had a stale `pg_hba.conf` configuration that didn't include authentication rules for three microservices. Similarly, in the new incoming ticket, the secondary node had a stale authentication config that prevented three microservices from authenticating.\n2. **PgBouncer caching:** In LONG-101, PgBouncer cached the failed connections and didn't retry. Similarly, in the new incoming ticket, PgBouncer cached the failed connections and didn't retry.\n3. **SSH access:** In LONG-101, SSH access to the RDS instances required security group modification, adding 5 minutes to the response time. Similarly, in the new incoming ticket, SSH access for emergency fixes is required, but the exact impact is not specified.\n\n**Action Items:**\n\nBased on the historical tickets, the following action items are suggested:\n\n1. **Implement automated config sync:** Implement an automated mechanism to sync the `pg_hba.conf` configuration between the primary and secondary nodes, similar to the solution proposed in LONG-101.\n2. **PgBouncer configuration changes:** Update the PgBouncer configuration to automatically retry failed authentication attempts, similar to the solution proposed in LONG-101.\n3. **Faster SSH access:** Implement a solution to provide faster SSH access for emergency fixes, similar to the solution proposed in LONG-101.\n4. **Health checks:** Implement health checks that verify all service accounts, not just one, to prevent similar issues in the future.\n\n**Code Changes:**\n\nBased on the historical tickets, the following code changes are suggested:\n\n1. **Update `pg_hba.conf` sync mechanism:** Update the `pg_hba.conf` sync mechanism to use a more robust and automated approach, similar to the solution proposed in LONG-101.\n2. **PgBouncer configuration updates:** Update the PgBouncer configuration to include automatic retry logic for failed authentication attempts, similar to the solution proposed in LONG-101.\n\n**Configuration Updates:**\n\nBased on the historical tickets, the following configuration updates are suggested:\n\n1. **Security group modifications:**",
+        "scores": {
+          "correctness": 3,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the stale authentication config as the root cause and proposes similar fixes as the ground truth. However, it misses the specific pg_hba.conf drift and the Parameter Store solution, and also doesn't mention the server_reconnect_timeout configuration update."
+        },
+        "retrieval_hit": true
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "LONG-101",
+          "SHOP-402",
+          "SHOP-104"
+        ],
+        "resolution": "Based on the historical tickets provided, I will suggest a resolution for the new incoming ticket.\n\n**Root Causes:**\n\n1. **Stale authentication config**: The secondary node had a stale pg_hba.conf configuration, which prevented three microservices from authenticating to the new primary node.\n2. **No automated sync mechanism for pg_hba.conf**: The lack of an automated sync mechanism between primary and secondary nodes led to the stale configuration.\n3. **PgBouncer connection caching**: PgBouncer cached the failed connections and did not retry, causing a prolonged outage.\n\n**Contributing Factors:**\n\n1. **No automated sync mechanism for pg_hba.conf**: As mentioned earlier, this contributed to the stale configuration.\n2. **DR drill checklist did not include verification of configuration parity**: This oversight led to the stale configuration going undetected.\n3. **PgBouncer connection caching**: This prevented automatic recovery even after the database was accessible.\n4. **SSH access to RDS instances required security group modification**: This added 5 minutes to the response time.\n\n**Resolution:**\n\n1. **Implement automated sync mechanism for pg_hba.conf**: Use a tool like Ansible or AWS Systems Manager to automate the sync of pg_hba.conf between primary and secondary nodes.\n2. **Configure PgBouncer to automatically retry failed auth**: Update the PgBouncer configuration to retry failed authentication attempts with an exponential backoff (e.g., 1s, 2s, 4s).\n3. **Faster SSH access for emergency fixes**: Update the security group to allow SSH access to RDS instances without requiring modification.\n4. **Health checks that verify ALL service accounts, not just one**: Update the health checks to verify all service accounts, including the three microservices that were affected by the stale configuration.\n\n**Code Changes:**\n\n1. Update the Ansible playbook to automate the sync of pg_hba.conf between primary and secondary nodes.\n2. Update the PgBouncer configuration to retry failed authentication attempts with an exponential backoff.\n3. Update the health checks to verify all service accounts.\n\n**Configuration Updates:**\n\n1. Update the security group to allow SSH access to RDS instances without requiring modification.\n2. Update the PgBouncer configuration to retry failed authentication attempts with an exponential backoff.\n\n**Estimated Time to Resolution:** 4-6 hours\n\n**Estimated Revenue Impact:** $0 (assuming the resolution is implemented before the next outage)\n\n**Post-Incident Review:** Schedule a post-incident review to discuss the",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root causes and contributing factors, but misses the specific cause of pg_hba.conf drift between primary and secondary nodes. It also correctly proposes fixes for the identified issues, but does not mention the Parameter Store as a solution for pg_hba.conf sync."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "LONG-101",
+          "SHOP-402",
+          "SHOP-701"
+        ],
+        "resolution": "Based on the historical tickets provided, I suggest the following resolution for the new incoming ticket:\n\n**Root Causes:**\n\n1. **Stale authentication config**: The secondary node had a stale authentication config, which prevented three microservices from authenticating to the new primary node.\n2. **PgBouncer cached failed connections**: PgBouncer cached the failed connections and wouldn't retry, leading to a prolonged outage.\n3. **Inadequate health checks**: The monitoring only checked \"can the APPLICATION connect to the database\" and didn't verify connectivity for ALL service accounts.\n\n**Exact Fixes:**\n\n1. **Implement automated pg_hba.conf sync between primary and failover**: Use AWS Systems Manager Parameter Store to store pg_hba.conf as a versioned parameter and run a cron job every 5 minutes to pull from SSM and diff against local. If a diff is detected, update local and `pg_ctl reload`. (PR #1251)\n2. **Add PgBouncer health check that detects stale connections and auto-restarts**: Set `server_login_retry = 3` and add `server_reconnect_timeout = 5` to PgBouncer config to retry auth failures automatically. (PR #1247)\n3. **Faster SSH access for emergency fixes**: Pre-authorize SSH access to RDS instances for on-call engineers. (P1 action item from Historical Ticket LONG-101)\n4. **Health checks that verify ALL service accounts**: Update health checks to verify connectivity for ALL service accounts, not just the health check user. (P0 action item from Historical Ticket LONG-101)\n\n**Code Changes:**\n\n1. Update PgBouncer config to set `server_login_retry = 3` and add `server_reconnect_timeout = 5`.\n2. Implement automated pg_hba.conf sync using AWS Systems Manager Parameter Store.\n\n**Configuration Updates:**\n\n1. Update health checks to verify connectivity for ALL service accounts.\n2. Pre-authorize SSH access to RDS instances for on-call engineers.\n\n**Additional Recommendations:**\n\n1. Perform a load test before the next sale to ensure the system can handle the expected traffic.\n2. Consider investigating connection pool library alternatives that handle failover gracefully (P2 action item from Historical Ticket LONG-101).\n\nNote that Historical Ticket SHOP-402 and SHOP-701 do not provide relevant resolution information for this issue.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root causes and provides fixes for stale authentication config, PgBouncer cached failed connections, and inadequate health checks. However, it does not explicitly mention the root cause of pg_hba.conf drift between primary and secondary nodes."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "LONG-101",
+          "LONG-501",
+          "SHOP-302"
+        ],
+        "resolution": "Based on the historical tickets provided, I'll suggest a resolution for the new incoming ticket.\n\n**Root Cause:** The root cause of the issue is the stale authentication config on the secondary node, which caused the PgBouncer to cache failed connections and not retry.\n\n**Similar Historical Tickets:**\n\n1. **LONG-101:** This ticket has similar action items that can be applied to the new incoming ticket:\n\t* Implement automated pg_hba.conf sync between primary and failover nodes.\n\t* Add PgBouncer health check that detects stale connections and auto-restarts.\n\t* Pre-authorize SSH access to RDS instances for on-call engineers.\n\t* Add pg_hba.conf parity check to DR drill checklist.\n2. **LONG-501:** This ticket has a similar issue with token revocation, which can be applied to the new incoming ticket:\n\t* Add a `token_generation` field to the user table, increment on password change, include in refresh token payload, and validate on use.\n3. **SHOP-302:** This ticket has a similar issue with JWT expiry, which can be applied to the new incoming ticket:\n\t* Reduce JWT expiry to 15 minutes + use refresh tokens.\n\n**Resolution:**\n\n1. **Config Sync:** Implement automated pg_hba.conf sync between primary and failover nodes using AWS Systems Manager Parameter Store, as described in PR #1251.\n2. **PgBouncer Health Check:** Add a PgBouncer health check that detects stale connections and auto-restarts, as described in LONG-101.\n3. **SSH Access:** Pre-authorize SSH access to RDS instances for on-call engineers, as described in LONG-101.\n4. **Health Checks:** Add health checks that verify connectivity for ALL service accounts, not just the health check user, as described in LONG-101.\n5. **Token Revocation:** Add a `token_generation` field to the user table, increment on password change, include in refresh token payload, and validate on use, as described in LONG-501.\n6. **JWT Expiry:** Reduce JWT expiry to 15 minutes + use refresh tokens, as described in SHOP-302.\n\n**Code Changes:**\n\n1. Update the `pg_hba.conf` sync script to use AWS Systems Manager Parameter Store.\n2. Update the PgBouncer health check to detect stale connections and auto-restarts.\n3. Update the SSH access script to pre-authorize access to RDS instances for on-call engineers.\n4. Update the health check script to verify",
+        "scores": {
+          "correctness": 3,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the stale authentication config as the root cause, but incorrectly attributes it to the secondary node's config being stale, whereas the ground truth states it's a pg_hba.conf drift between primary and secondary. The resolution covers most of the key points from the ground truth, but misses the specific fix for the pg_hba.conf drift."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "LONG-101",
+          "SHOP-402",
+          "LONG-401"
+        ],
+        "resolution": "Based on the historical tickets provided, I will suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nThe root cause of the issue is the stale authentication config on the secondary node during the RDS Multi-AZ failover. This is similar to Historical Ticket LONG-101, where the failover node had a different pg_hba.conf configuration.\n\n**Similarities with Historical Tickets:**\n\n1. **Stale pg_hba.conf**: In LONG-101, the secondary node had a stale pg_hba.conf configuration that did not include authentication rules for three microservices. Similarly, in the new incoming ticket, the secondary node had a stale authentication config.\n2. **PgBouncer caching failed connections**: In LONG-101, PgBouncer cached the old connection and was not retrying, causing the issue. Similarly, in the new incoming ticket, PgBouncer cached the failed connections and wouldn't retry.\n3. **Lack of automated sync mechanism**: In LONG-101, there was no automated sync mechanism for pg_hba.conf between primary and secondary nodes. Similarly, in the new incoming ticket, there is no automated sync mechanism for authentication config between primary and secondary nodes.\n\n**Resolution:**\n\nBased on the similarities with Historical Ticket LONG-101, I recommend the following resolution:\n\n1. **Implement automated sync mechanism for authentication config**: Implement a mechanism to automatically sync the authentication config between primary and secondary nodes. This can be achieved by using a configuration management tool like Ansible or Puppet to manage the pg_hba.conf file on both nodes.\n2. **Configure PgBouncer to automatically retry failed auth**: Configure PgBouncer to automatically retry failed authentication attempts. This can be achieved by setting the `retry` parameter in the PgBouncer configuration file.\n3. **Implement health checks that verify ALL service accounts**: Implement health checks that verify all service accounts, not just one. This can be achieved by using a tool like Prometheus and Grafana to monitor the health of all service accounts.\n4. **Faster SSH access for emergency fixes**: Implement faster SSH access for emergency fixes by modifying the security group to allow SSH access to the RDS instances.\n\n**Code Changes:**\n\nNo specific code changes are required for this resolution. However, the automated sync mechanism for authentication config and the configuration of PgBouncer to automatically retry failed auth will require changes to the configuration files.\n\n**Configuration Updates:**\n\nThe following configuration updates are required:\n\n1. **pg_hba.conf**: Update the pg_hba.conf file on both",
+        "scores": {
+          "correctness": 3,
+          "completeness": 2,
+          "hallucination": 4,
+          "reasoning": "The suggested resolution correctly identifies the stale authentication config and PgBouncer caching failed connections as issues, but incorrectly identifies the root cause as a pg_hba.conf drift. The resolution also misses the key fix step of implementing SSM-based pg_hba.conf sync and setting PgBouncer server_login_retry and server_reconnect_timeout."
+        },
+        "retrieval_hit": true
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "LONG-101",
+          "SHOP-402",
+          "LONG-501"
+        ],
+        "resolution": "Based on the historical tickets provided, I'll suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nThe root cause of the issue is the stale authentication config on the secondary node, which prevented three microservices from authenticating to the new primary node. This led to cascading connection failures across the entire application stack due to shared PgBouncer pools. Additionally, PgBouncer cached the failed connections and wouldn't retry, further exacerbating the issue.\n\n**Similarities with Historical Tickets:**\n\nHistorical Ticket LONG-101 and SHOP-402 share similarities with the new incoming ticket:\n\n1. **Stale configuration:** LONG-101 had a stale `pg_hba.conf` configuration on the secondary node, while SHOP-402 had long-running inventory check queries that held connections.\n2. **PgBouncer connection caching:** Both tickets had issues with PgBouncer caching failed connections and not retrying.\n3. **Connection pool exhaustion:** SHOP-402 had a connection pool exhaustion issue due to long-running queries.\n\n**Action Items:**\n\nBased on the historical tickets, I recommend the following action items:\n\n1. **Implement automated config sync:** Implement an automated mechanism to sync the `pg_hba.conf` configuration between the primary and secondary nodes, similar to the solution proposed in LONG-101.\n2. **PgBouncer configuration changes:** Update the PgBouncer configuration to enable automatic retry of failed connections, similar to the solution proposed in SHOP-402.\n3. **Health checks:** Implement health checks that verify all service accounts, not just one, to prevent similar issues in the future.\n4. **Faster SSH access:** Implement faster SSH access for emergency fixes, similar to the solution proposed in LONG-101.\n5. **Post-incident review:** Schedule a post-incident review to discuss the root cause, contributing factors, and action items to prevent similar issues in the future.\n\n**Code Changes and Configuration Updates:**\n\nTo implement the above action items, the following code changes and configuration updates are required:\n\n1. **Automated config sync:** Implement a script that syncs the `pg_hba.conf` configuration between the primary and secondary nodes using a tool like Ansible or Puppet.\n2. **PgBouncer configuration changes:** Update the PgBouncer configuration to enable automatic retry of failed connections by setting the `retry_timeout` parameter to a lower value (e.g., 10 seconds).\n3. **Health checks:** Implement health checks that verify all service accounts by using a tool like Prometheus and Grafana to monitor",
+        "scores": {
+          "correctness": 3,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the stale authentication config as the root cause and proposes automated config sync and PgBouncer configuration changes. However, it misses the pg_hba.conf drift between primary and secondary nodes and the specific PgBouncer parameters (server_login_retry and server_reconnect_timeout) required to enable automatic retry of failed connections."
+        },
+        "retrieval_hit": true
+      }
+    },
+    "NEW-009": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "LONG-201",
+          "LONG-401",
+          "SHOP-404"
+        ],
+        "resolution": "Based on the historical tickets provided, I will attempt to suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis**\n\nThe order-processing-service pods are being OOM-killed by Kubernetes approximately every 48 hours. The service starts with ~256MB RSS and grows steadily at approximately 2.1MB/hour until hitting the 512MB memory limit. The memory leak is caused by the `OrderProcessor` class having a class-level dict `_processing_cache` that is never cleared.\n\n**Similar Historical Tickets**\n\nHistorical Ticket LONG-201 and LONG-401 both deal with memory leaks and incorrect handling of errors. However, LONG-201 is more relevant to this issue as it deals with a memory leak in the order processing service.\n\n**Resolution**\n\nBased on the analysis of LONG-201, the fix is straightforward:\n\n1. **Use an instance variable instead of a class variable**: Change the `OrderProcessor` class to use an instance variable instead of a class variable for the `_processing_cache`. This will ensure that each instance of the class has its own cache, which will prevent the memory leak.\n2. **Clear the cache after processing**: After processing each order, clear the cache entry for that order to prevent it from growing indefinitely.\n3. **Consider using an LRU cache**: If the cache is still growing too quickly, consider using an LRU (Least Recently Used) cache to limit the size of the cache.\n\n**Code Changes**\n\nThe code changes will involve modifying the `OrderProcessor` class to use an instance variable for the `_processing_cache` and clearing the cache after processing each order. Here is an example of the modified code:\n```python\nclass OrderProcessor:\n    def __init__(self):\n        self._processing_cache = {}  # Use an instance variable instead of a class variable\n\n    def process_order(self, order):\n        context = self._build_order_context(order)\n        self._processing_cache[order.id] = context  # Add to cache\n        # ... process order ...\n        del self._processing_cache[order.id]  # Clear cache entry after processing\n```\n**Configuration Updates**\n\nNo configuration updates are required for this fix.\n\n**Testing**\n\nTest the modified code with a load test to ensure that the memory leak is fixed and the service can handle the expected load without OOM-killing.\n\n**Additional Recommendations**\n\nConsider implementing the following additional recommendations to improve the reliability and performance of the order processing service:\n\n* Implement PDBs (Pod Disruption Budgets) to ensure that the",
+        "scores": {
+          "correctness": 5,
+          "completeness": 5,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause of the memory leak, provides a clear and correct fix, and includes all key steps from the ground truth. The resolution also avoids fabricating any information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "LONG-201",
+          "SHOP-101",
+          "SHOP-701"
+        ],
+        "resolution": "Based on the historical tickets, I will attempt to provide a resolution for the new incoming ticket.\n\n**Root Cause:**\nThe root cause of the memory leak in the order processing service is likely due to the class-level dict `_processing_cache` in the `OrderProcessor` class, which is shared across all instances and never cleared. This causes the cache to grow indefinitely, leading to memory leaks and OOM kills.\n\n**Exact Fix:**\nTo fix this issue, we can apply one of the following solutions:\n\nA) Use an instance variable instead of a class variable and clear it after processing:\n```python\nclass OrderProcessor:\n    def process_order(self, order):\n        context = self._build_order_context(order)\n        self.__dict__['processing_cache'] = {order.id: context}  # use instance variable\n        # ... process order ...\n        # BUG: processing_cache is cleared after processing\n        self.__dict__.pop('processing_cache', None)\n```\nB) Use an LRU cache with a max size:\n```python\nfrom functools import lru_cache\n\nclass OrderProcessor:\n    @lru_cache(maxsize=1000)  # set max size to 1000\n    def _build_order_context(self, order):\n        context = ...  # build context\n        return context\n```\nC) Just delete the entry after processing:\n```python\nclass OrderProcessor:\n    def process_order(self, order):\n        context = self._build_order_context(order)\n        self._processing_cache[order.id] = context  # grows forever\n        # ... process order ...\n        # BUG: delete entry after processing\n        del self._processing_cache[order.id]\n```\n**Code Changes:**\nWe need to modify the `OrderProcessor` class to use one of the above solutions. We can also consider using a more robust caching mechanism, such as Redis or Memcached, to store the order context.\n\n**Configuration Updates:**\nWe should also consider updating the Kubernetes configuration to increase the memory limit for the order processing service pods. Additionally, we can configure the service to restart automatically when it reaches the memory limit, to minimize the impact on customers.\n\n**Additional Recommendations:**\nTo prevent similar memory leaks in the future, we should:\n\n* Regularly review and optimize the caching mechanisms used in the service.\n* Use tools like `tracemalloc` to detect memory leaks and identify the root cause.\n* Implement automated testing and monitoring to detect performance issues early on.\n\nBased on the historical tickets,",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause of the memory leak as the class-level dict _processing_cache, but it does not provide the exact fix as stated in the ground truth. The resolution also includes some additional recommendations that are not present in the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "LONG-201",
+          "SHOP-402",
+          "SHOP-404"
+        ],
+        "resolution": "Based on the historical tickets provided, I will attempt to suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nThe root cause of the issue appears to be a memory leak in the `order_processor.py` file, specifically in the `_build_order_context` method. The leak is caused by a class-level dictionary `_processing_cache` that is shared across all instances of the `OrderProcessor` class. This dictionary grows indefinitely as orders are processed, leading to an Out-of-Memory (OOM) error.\n\n**Similar Historical Tickets:**\n\nHistorical Ticket LONG-201 provides a similar resolution for a memory leak in the `order_processor.py` file. The fix involves changing the class-level dictionary to an instance variable and adding a cleanup mechanism to remove the entry after processing is complete.\n\nHistorical Ticket SHOP-402 and SHOP-404 do not appear to be directly related to the memory leak issue, but they do provide some context on optimizing database queries and scaling services.\n\n**Resolution:**\n\nBased on the historical tickets, I recommend the following resolution:\n\n1. **Change the class-level dictionary to an instance variable**: Update the `OrderProcessor` class to use an instance variable instead of a class variable for the `_processing_cache` dictionary.\n2. **Add a cleanup mechanism**: Add a `finally` block to the `process_order` method to remove the entry from the `_processing_cache` dictionary after processing is complete.\n3. **Add a Prometheus gauge for the cache size**: Add a Prometheus gauge to monitor the size of the `_processing_cache` dictionary and alert if it grows beyond expected bounds.\n4. **Review and fix other potential leaks**: Review the codebase for other potential memory leaks, such as the `_response_cache` dictionary in `inventory_client.py` and the TTL cache in `utils/cache.py`.\n\n**Code Changes:**\n\nHere is an example of the updated code:\n```python\nclass OrderProcessor:\n    def __init__(self):\n        self._processing_cache = {}  # instance variable now\n\n    def process_order(self, order):\n        context = self._build_order_context(order)\n        self._processing_cache[order.id] = context\n        try:\n            result = self._execute_order(context)\n        finally:\n            if order.id is not None:\n                self._processing_cache.pop(order.id, None)  # always clean up\n        return result\n```\n**Configuration Updates:**\n\nNo configuration updates are required for this resolution.\n\n**Additional Recommendations:**\n\n1. **Load testing**: Perform load",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause of the memory leak and proposes a fix, but it does not fully capture the nuances of the ground truth, such as using a bounded LRU cache. The resolution also avoids fabricating information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "LONG-201",
+          "LONG-401",
+          "SHOP-601"
+        ],
+        "resolution": "Based on the historical tickets provided, I'll attempt to suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis:**\n\nThe order processing service is experiencing a memory leak, leading to OOM-kills every 48 hours. The memory growth rate is approximately 2MB/hour, with the largest allocation in `order_processor.py` at line 142 in the `_build_order_context` method.\n\n**Similar Historical Tickets:**\n\nHistorical Ticket LONG-201 and LONG-401 provide relevant insights into memory leaks in the order processing service.\n\n**Applicable Fixes:**\n\nFrom Historical Ticket LONG-201:\n\n1. **Fix the memory leak in `order_processor.py`**: Change the class-level dict `_processing_cache` to an instance variable and clean it up after processing each order. This can be achieved by using a `finally` block to remove the entry from the cache.\n2. **Add a Prometheus gauge for the cache size**: Monitor the cache size to detect potential issues in the future.\n\nFrom Historical Ticket LONG-401:\n\n1. **Parse individual item errors and retry failed documents**: Separate successes from failures in the bulk indexing response and retry failed documents with a backoff strategy.\n2. **Size-based batching**: Accumulate documents until the batch size hits 50MB, instead of using a fixed 500-document batch size.\n\n**Additional Recommendations:**\n\n1. **Review and fix the memory leak in `inventory_client.py`**: Similar to the fix in LONG-201, change the class-level dict `_response_cache` to an instance variable and clean it up after processing each response.\n2. **Consider using Redis for inventory reservation**: As suggested in SHOP-601, using Redis for inventory reservation with TTL-based expiry for unpaid reservations can help scale the system for high-traffic events like Black Friday.\n\n**Code Changes:**\n\n```python\n# order_processor.py\nclass OrderProcessor:\n    def __init__(self):\n        self._processing_cache = {}  # instance variable now\n\n    def process_order(self, order):\n        context = self._build_order_context(order)\n        self._processing_cache[order.id] = context\n        try:\n            result = self._execute_order(context)\n        finally:\n            if order.id is not None:\n                self._processing_cache.pop(order.id, None)  # always clean up\n        return result\n\n# inventory_client.py\nclass InventoryClient:\n    def __init__(self):\n        self._response_cache = {}  # instance variable now\n\n    def process_response(self, response",
+        "scores": {
+          "correctness": 4,
+          "completeness": 3,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the memory leak and its location, but it does not mention the actual cause of the leak (the class-level dict being a per-request cache). It also introduces an additional fix for the inventory client that is not present in the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "LONG-201",
+          "SHOP-503",
+          "SHOP-402"
+        ],
+        "resolution": "Based on the historical tickets, I'll attempt to resolve the new incoming ticket.\n\n**Root Cause Analysis:**\n\nFrom Historical Ticket LONG-201, we know that the memory leak is caused by the `OrderProcessor` class having a class-level dict `_processing_cache` that is never cleared. This dict grows indefinitely, causing the memory leak.\n\n**Fix:**\n\nTo fix this issue, we can apply the same solution as in Historical Ticket LONG-201:\n\nA) Use an instance variable instead of class variable + clear after processing\n\nIn `order_processor.py`, replace the class-level dict `_processing_cache` with an instance variable `self._processing_cache` and clear it after processing each order:\n\n```python\nclass OrderProcessor:\n    def __init__(self):\n        self._processing_cache = {}  # instance variable\n\n    def process_order(self, order):\n        context = self._build_order_context(order)\n        self._processing_cache[order.id] = context  # grows forever\n        # ... process order ...\n        # FIX: clear cache after processing\n        self._processing_cache.pop(order.id, None)\n```\n\nAlternatively, we can use an LRU cache with a max size, as suggested in Historical Ticket LONG-201.\n\n**Additional Recommendations:**\n\nTo prevent similar issues in the future, I recommend:\n\n1. Regularly reviewing and optimizing code for memory leaks and performance issues.\n2. Implementing a robust testing framework to catch issues like this before they cause problems in production.\n3. Considering using a more advanced caching solution, such as Redis or Memcached, to reduce memory usage and improve performance.\n\n**Configuration Updates:**\n\nNo specific configuration updates are required for this fix. However, it's essential to monitor the memory usage and performance of the order-processing-service to ensure that the fix is effective and doesn't introduce new issues.\n\n**Code Changes:**\n\nThe code change is straightforward and involves replacing the class-level dict with an instance variable and clearing it after processing each order. The updated code is shown above.\n\n**Testing:**\n\nTo verify that the fix is effective, I recommend running load tests and monitoring the memory usage and performance of the order-processing-service. This will help ensure that the fix doesn't introduce new issues and that the service can handle the expected load without memory leaks.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause of the memory leak as a class-level dict that is never cleared, but it does not provide the exact solution as stated in the ground truth. The resolution also includes additional recommendations and testing steps that are not present in the ground truth."
+        },
+        "retrieval_hit": true
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "LONG-201",
+          "LONG-401",
+          "SHOP-701"
+        ],
+        "resolution": "Based on the historical tickets provided, I will attempt to suggest a resolution for the new incoming ticket.\n\n**Root Cause Analysis**\n\nThe new incoming ticket describes an OOM-killed order processing service every 48 hours due to a memory leak. The memory leak is caused by the `OrderProcessor` class having a class-level dict `_processing_cache` that is never cleared. This is similar to Historical Ticket LONG-201, where the root cause was also a class-level cache that was not properly cleared.\n\n**Fix**\n\nTo fix this issue, we can follow the same solution as Historical Ticket LONG-201:\n\nA) Use an instance variable instead of a class variable + clear after processing\nB) Use an LRU cache with a max size\nC) Just delete the entry after processing\n\nIn this case, I recommend option A) using an instance variable instead of a class variable. This will ensure that each instance of the `OrderProcessor` class has its own cache, which will prevent the memory leak.\n\n**Code Change**\n\nTo implement this fix, we need to modify the `OrderProcessor` class to use an instance variable instead of a class variable. We can do this by replacing the class-level dict `_processing_cache` with an instance-level dict `self._processing_cache`. We also need to clear the cache after processing each order.\n\n```python\nclass OrderProcessor:\n    def __init__(self):\n        self._processing_cache = {}  # Use instance-level cache\n\n    def process_order(self, order):\n        context = self._build_order_context(order)\n        self._processing_cache[order.id] = context  # Add to instance-level cache\n        # ... process order ...\n        # Clear cache after processing\n        del self._processing_cache[order.id]\n```\n\n**Configuration Update**\n\nNo configuration updates are required for this fix.\n\n**Additional Recommendations**\n\nTo prevent similar memory leaks in the future, I recommend:\n\n* Regularly reviewing and optimizing the codebase for memory leaks\n* Using tools like `tracemalloc` to detect memory leaks\n* Implementing a caching strategy that is properly cleared after use\n\n**Conclusion**\n\nBased on the historical tickets provided, the root cause of the memory leak in the order processing service is a class-level cache that is not properly cleared. To fix this issue, we can use an instance variable instead of a class variable and clear the cache after processing each order. This fix is similar to Historical Ticket LONG-201, which also had a class-level cache that was not properly cleared.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause of the memory leak as a class-level cache, but it does not mention the specific line of code where the leak occurs. The resolution also covers the key fix steps from the ground truth, but it does not provide the most optimal solution, which is to use a bounded LRU cache."
+        },
+        "retrieval_hit": true
+      }
+    },
+    "NEW-010": {
+      "adaptive_blob_chunk": {
+        "retrieved_keys": [
+          "LONG-401",
+          "SHOP-203"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The Elasticsearch bulk API silently drops ~3% of product updates because our code only checks the top-level HTTP status code (200) and ignores individual document errors.\n\n**Fix:**\n\n1. **Inspect per-document errors in the response body**: Modify the code to parse the response body and check for individual document errors, specifically the `errors` field and the `status` field for each item in the `items` array.\n2. **Handle 429 errors**: Implement a retry mechanism for 429 errors, which happen when ES is under load and the thread pool queue is full. This can be done by adding a retry handler that waits for a short period before retrying the failed documents.\n3. **Update affected code**:\n\t* `search_indexer/bulk_indexer.py`: Modify the bulk indexing logic to inspect per-document errors and handle 429 errors.\n\t* `search_indexer/retry_handler.py`: Update the retry logic to handle 429 errors.\n\t* `search_indexer/monitoring.py`: Update the success metrics to count individual documents, not just requests.\n\n**Code Changes:**\n\n```python\nresponse = es_client.bulk(body=bulk_body)\nif response.status_code == 200:\n    logger.info(f\"Bulk indexed {len(docs)} documents\")\n    # Check for individual document errors\n    if response[\"errors\"]:\n        logger.error(\"Bulk indexing failed with errors\")\n        # Handle individual document errors\n        for item in response[\"items\"]:\n            if item[\"status\"] == 429:\n                # Retry mechanism for 429 errors\n                retry_handler.handle_429_error(item[\"_id\"])\n            elif item[\"status\"] != 200:\n                logger.error(f\"Document {item['_id']} failed with status {item['status']}\")\n```\n\n**Configuration Updates:**\n\n1. **Increase ES cluster's write thread pool size**: Increase the write thread pool size to reduce the likelihood of 429 errors.\n2. **Adjust refresh_interval**: Set `refresh_interval` to `-1` to prevent frequent refreshes during bulk operations.\n3. **Implement incremental indexing**: Implement incremental indexing to reduce the load on the ES cluster and improve search results freshness.\n\n**Additional Recommendations:**\n\n1. **Monitor ES cluster performance**: Continuously monitor ES cluster performance to detect potential issues before they become critical.\n2. **Implement load testing**: Perform load testing to simulate peak indexing times and identify potential bottlenecks.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and proposes fixes for inspecting per-document errors, handling 429 errors, and updating affected code. However, it lacks the implementation details for retrying 429/503 errors with exponential backoff and sending permanent failures to a dead letter queue."
+        },
+        "retrieval_hit": true
+      },
+      "hyde": {
+        "retrieved_keys": [
+          "LONG-401",
+          "SHOP-203",
+          "SHOP-702"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The Elasticsearch bulk API silently drops ~3% of product updates because the code only checks the top-level HTTP status code (200) and ignores individual document errors.\n\n**Similar Root Cause:** This is similar to Historical Ticket LONG-401, where the search indexing pipeline drops documents silently when Elasticsearch bulk API returns partial failures. The root cause is the same: ignoring individual document errors in the bulk response.\n\n**Fix:** To fix this issue, we need to inspect the per-document errors in the response body. We can do this by parsing the bulk response and checking for individual document failures. We should also retry failed documents to ensure they are indexed correctly.\n\n**Code Changes:**\n\n1. Update `search_indexer/bulk_indexer.py` to parse the bulk response and check for individual document failures.\n2. Update `search_indexer/retry_handler.py` to retry failed documents.\n3. Update `search_indexer/monitoring.py` to track individual document failures and retry attempts.\n\n**Configuration Updates:**\n\n1. Increase the ES cluster's write thread pool size to reduce the likelihood of 429 errors.\n2. Set `refresh_interval=-1` during bulk operations to reduce the number of refreshes and improve indexing performance.\n\n**Additional Recommendations:**\n\n1. Implement incremental indexing to reduce the load on the ES cluster and improve indexing performance.\n2. Consider using parallel bulk indexing to improve indexing performance.\n3. Monitor ES cluster health and adjust configuration as needed to prevent 429 errors.\n\n**Code Snippet:**\n```python\nimport json\n\ndef bulk_indexer(es_client, bulk_body):\n    response = es_client.bulk(body=bulk_body)\n    if response.status_code == 200:\n        logger.info(f\"Bulk indexed {len(docs)} documents\")\n        # Parse bulk response and check for individual document failures\n        bulk_response = json.loads(response.content)\n        for item in bulk_response[\"items\"]:\n            if item[\"status\"] != 200:\n                # Retry failed documents\n                retry_handler.retry_document(item)\n    else:\n        logger.error(f\"Bulk indexing failed with status code {response.status_code}\")\n```\n**Note:** The above code snippet is a simplified example and may need to be adapted to your specific use case.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 3,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause and the need to parse individual item errors from the bulk response. However, it lacks the implementation details of retrying 429/503 errors with exponential backoff and sending permanent failures to a dead letter queue."
+        },
+        "retrieval_hit": true
+      },
+      "multi_vector": {
+        "retrieved_keys": [
+          "LONG-401",
+          "SHOP-203",
+          "SHOP-702"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The root cause of the issue is the silent dropping of ~3% of product updates due to the ES bulk API silently dropping documents with 429 rejected errors when the ES cluster's write thread pool fills up during peak indexing times.\n\n**Fixes:**\n\n1. **Parse individual item errors and retry failed documents:** Implement the fix from Historical Ticket LONG-401, which involves parsing individual item errors and retrying failed documents. This will ensure that documents with 429 rejected errors are retried instead of being silently dropped.\n2. **Size-based batching:** Implement size-based batching as suggested in Historical Ticket LONG-401. This will prevent large bulk requests from being sent to the ES cluster, which can cause the write thread pool to fill up and lead to 429 rejected errors.\n3. **Parallel bulk indexing:** Consider implementing parallel bulk indexing with multiple workers, as suggested in Historical Ticket SHOP-203. This can help distribute the indexing load across multiple threads and reduce the likelihood of the write thread pool filling up.\n\n**Code Changes:**\n\n* Implement the fix from Historical Ticket LONG-401 in the `bulk_index` method of `bulk_indexer.py`.\n* Implement size-based batching in the `_batch_by_size` method of `bulk_indexer.py`.\n* Consider implementing parallel bulk indexing with multiple workers, as suggested in Historical Ticket SHOP-203.\n\n**Configuration Updates:**\n\n* Increase the size of the ES cluster's write thread pool to handle the increased indexing load.\n* Consider implementing a circuit breaker to prevent the write thread pool from filling up and causing 429 rejected errors.\n* Monitor the ES cluster's performance and adjust the indexing configuration as needed to prevent the write thread pool from filling up.\n\n**Additional Recommendations:**\n\n* Consider implementing a dead-letter queue to handle permanent failures, as suggested in Historical Ticket LONG-401.\n* Monitor the indexing performance and adjust the configuration as needed to prevent the write thread pool from filling up.\n* Consider implementing a more robust error handling mechanism to handle permanent failures and prevent them from being silently dropped.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution mostly accurately describes the root cause and provides some correct fixes, but it misses the implementation of exponential backoff and the specific details of the dead-letter queue. The resolution also avoids fabricating information not supported by the historical tickets."
+        },
+        "retrieval_hit": true
+      },
+      "hyde_multi_vector": {
+        "retrieved_keys": [
+          "LONG-401",
+          "SHOP-203",
+          "SHOP-101"
+        ],
+        "resolution": "Based on the historical tickets, I suggest the following resolution for the new incoming ticket:\n\n**Root Cause:** The root cause of the issue is that the Elasticsearch bulk API silently drops ~3% of product updates due to 429 rejected documents (es_rejected_execution) when the ES cluster's write thread pool fills up during peak indexing times.\n\n**Fixes:**\n\n1. **Parse individual item errors and retry failed documents:** Implement the fix from Historical Ticket LONG-401, which separates successes from failures and retries failed documents with a backoff strategy. This will ensure that failed documents are not silently dropped and are retried with a delay to avoid overwhelming the ES cluster.\n2. **Size-based batching:** Implement the fix from Historical Ticket LONG-401, which accumulates documents until the batch size hits 50MB. This will prevent large bulk requests from triggering circuit breaker exceptions (413) and reduce the load on the ES cluster.\n3. **Monitor and adjust write thread pool size:** Based on Historical Ticket LONG-401, the write thread pool size is currently set to 8 with a queue size of 200. Consider increasing the thread pool size or adjusting the queue size to handle peak indexing times more efficiently.\n4. **Implement incremental indexing:** Based on Historical Ticket SHOP-203, consider implementing incremental indexing to reduce the load on the ES cluster and improve indexing performance.\n\n**Code Changes:**\n\n* Update `bulk_indexer.py` to implement the fix from Historical Ticket LONG-401, which includes parsing individual item errors and retrying failed documents.\n* Update `bulk_indexer.py` to implement size-based batching, as described in Historical Ticket LONG-401.\n\n**Configuration Updates:**\n\n* Update the write thread pool size and queue size in the Elasticsearch configuration to handle peak indexing times more efficiently.\n* Consider reducing the Redis TTL for the Stripe API key to 6 hours or adding a cache bust on rotation, as described in Historical Ticket SHOP-101.\n\n**Monitoring and Testing:**\n\n* Monitor the ES cluster's performance and indexing metrics to ensure that the fixes are effective in reducing the number of silently dropped documents.\n* Test the updated code and configuration changes to ensure that they do not introduce any new issues or performance problems.\n\nBy implementing these fixes, you should be able to reduce the number of silently dropped documents and improve the overall indexing performance of your Elasticsearch cluster.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution correctly identifies the root cause and proposes fixes for parsing individual item errors, size-based batching, and monitoring. However, it lacks the specific details about retrying 429/503 errors with exponential backoff and sending permanent failures to a dead letter queue."
+        },
+        "retrieval_hit": true
+      },
+      "rerank": {
+        "retrieved_keys": [
+          "LONG-401",
+          "SHOP-203",
+          "SHOP-901"
+        ],
+        "resolution": "Based on the historical tickets, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The Elasticsearch bulk API silently drops ~3% of product updates because the code only checks the top-level HTTP status code (200) and ignores individual document errors.\n\n**Fix:**\n\n1. **Inspect per-document errors in the response body**: Modify the code to parse the response body and check for individual document errors, specifically the `errors` field and the `status` field of each item in the `items` array.\n2. **Handle 429 errors**: Implement a retry mechanism for 429 errors, which occur when the ES cluster's write thread pool is full. This can be done by adding a retry handler that waits for a short period before retrying the failed documents.\n3. **Monitor and alert on individual document failures**: Implement monitoring and alerting to detect when individual document failures exceed a certain threshold (e.g., 1% of total documents).\n\n**Code Changes:**\n\n* Modify the `search_indexer/bulk_indexer.py` file to parse the response body and check for individual document errors.\n* Add a retry handler in `search_indexer/retry_handler.py` to handle 429 errors.\n* Update `search_indexer/monitoring.py` to monitor and alert on individual document failures.\n\n**Configuration Updates:**\n\n* Review and update the `refresh_interval` setting for the Elasticsearch index to ensure it is set to `-1` during bulk operations.\n* Consider increasing the size of the ES cluster's write thread pool to reduce the likelihood of 429 errors.\n\n**Additional Recommendations:**\n\n* Consider implementing incremental indexing to reduce the load on the ES cluster and improve indexing performance.\n* Review and optimize the analyzers used during indexing to reduce processing time.\n* Implement data validation alerts to detect significant changes in metrics, such as the conversion rate.\n\n**Historical Ticket Relevance:**\n\n* Historical Ticket LONG-401 is highly relevant, as it describes a similar issue with silent document drops due to ignoring individual document errors.\n* Historical Ticket SHOP-203 is partially relevant, as it discusses indexing performance issues, but the root cause and fix are different.\n* Historical Ticket SHOP-901 is not relevant to the current issue.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and proposes fixes for inspecting per-document errors, handling 429 errors, and monitoring individual document failures. However, it lacks the specific implementation details for retrying 429/503 errors with exponential backoff and sending permanent failures to a dead letter queue."
+        },
+        "retrieval_hit": true
+      },
+      "query_rewrite_adaptive": {
+        "retrieved_keys": [
+          "LONG-401",
+          "SHOP-203"
+        ],
+        "resolution": "Based on the historical tickets, I recommend the following resolution for the new incoming ticket:\n\n**Root Cause:** The Elasticsearch bulk API silently drops ~3% of product updates because our code only checks the top-level HTTP status code (200) and ignores individual document errors.\n\n**Fix:**\n\n1. **Inspect per-document errors in the response body**: Modify the code to parse the response body and check for individual document errors, especially 429 rejected documents. This will help identify and handle the rejected documents.\n2. **Handle 429 errors**: Implement a retry mechanism for 429 errors, with an exponential backoff strategy to avoid overwhelming the ES cluster. This will help ensure that rejected documents are re-indexed when the cluster is less busy.\n3. **Monitor and alert on individual document failures**: Update the monitoring script to track individual document failures, including 429 errors. This will help identify when the ES cluster is under load and when to trigger the retry mechanism.\n4. **Parallelize bulk indexing**: Consider parallelizing the bulk indexing process using multiple workers, as mentioned in SHOP-203. This will help reduce the load on the ES cluster and improve indexing performance.\n\n**Code Changes:**\n\n* Update the `search_indexer/bulk_indexer.py` file to parse the response body and check for individual document errors.\n* Implement a retry mechanism for 429 errors in the `search_indexer/retry_handler.py` file.\n* Update the `search_indexer/monitoring.py` file to track individual document failures and alert on 429 errors.\n\n**Configuration Updates:**\n\n* Set `refresh_interval=-1` during bulk operations to prevent frequent refreshes and reduce indexing latency.\n* Consider increasing the ES cluster's write thread pool size and queue size to improve indexing performance.\n\n**Additional Recommendations:**\n\n* Consider implementing incremental indexing to reduce the load on the ES cluster and improve search results freshness.\n* Monitor ES cluster performance and adjust the indexing configuration as needed to ensure optimal performance.\n\nBy implementing these changes, we should be able to reduce the number of silently dropped product updates and improve search results freshness.",
+        "scores": {
+          "correctness": 4,
+          "completeness": 4,
+          "hallucination": 5,
+          "reasoning": "The suggested resolution accurately identifies the root cause and proposes fixes for inspecting per-document errors, handling 429 errors, and monitoring individual document failures. However, it lacks the specific implementation details for retrying 429/503 errors with exponential backoff and sending permanent failures to a dead letter queue."
+        },
+        "retrieval_hit": true
+      }
+    }
+  },
+  "summary": {
+    "adaptive_blob_chunk": {
+      "retrieval_hit_rate": 0.9,
+      "avg_correctness": 3.9,
+      "avg_completeness": 3.9,
+      "avg_hallucination": 5.0,
+      "avg_overall": 4.266666666666667
+    },
+    "hyde": {
+      "retrieval_hit_rate": 1.0,
+      "avg_correctness": 4.2,
+      "avg_completeness": 3.9,
+      "avg_hallucination": 5.0,
+      "avg_overall": 4.366666666666666
+    },
+    "multi_vector": {
+      "retrieval_hit_rate": 1.0,
+      "avg_correctness": 4.5,
+      "avg_completeness": 4.3,
+      "avg_hallucination": 5.0,
+      "avg_overall": 4.6
+    },
+    "hyde_multi_vector": {
+      "retrieval_hit_rate": 1.0,
+      "avg_correctness": 3.9,
+      "avg_completeness": 3.5,
+      "avg_hallucination": 4.9,
+      "avg_overall": 4.1
+    },
+    "rerank": {
+      "retrieval_hit_rate": 0.9,
+      "avg_correctness": 3.8,
+      "avg_completeness": 3.8,
+      "avg_hallucination": 4.8,
+      "avg_overall": 4.133333333333334
+    },
+    "query_rewrite_adaptive": {
+      "retrieval_hit_rate": 1.0,
+      "avg_correctness": 4.2,
+      "avg_completeness": 4.3,
+      "avg_hallucination": 5.0,
+      "avg_overall": 4.5
+    }
+  }
+}

@@ -1,0 +1,410 @@
+{
+  "summary_only": [
+    {
+      "question": "What caused the Stripe payment errors and how was ",
+      "target": "SHOP-101",
+      "retrieved": "SHOP-101",
+      "correct_retrieval": true,
+      "correctness": 3,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer contains some correct general information about Stripe 500 errors, but it fails to address the specific cause and solution mentioned in the ground truth. The answer does not introduce any new information not present in the context."
+    },
+    {
+      "question": "Why are customers not receiving order status email",
+      "target": "SHOP-503",
+      "retrieved": "SHOP-503",
+      "correct_retrieval": true,
+      "correctness": 0,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer does not contain any correct facts from the ground truth, and it makes no attempt to address the actual issue. The answer is entirely speculative and unrelated to the provided context."
+    },
+    {
+      "question": "How is the search zero results problem being solve",
+      "target": "SHOP-201",
+      "retrieved": "SHOP-201",
+      "correct_retrieval": true,
+      "correctness": 3,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is partially correct as it acknowledges the problem of search zero results for misspelled queries without fuzzy matching. However, it fails to provide any solution or key points from the ground truth, resulting in a low completeness score."
+    },
+    {
+      "question": "What's the root cause of the overselling bug and w",
+      "target": "SHOP-601",
+      "retrieved": "SHOP-601",
+      "correct_retrieval": true,
+      "correctness": 4,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the root cause of the overselling bug as a race condition in the inventory service, but it fails to mention the specific fix and the database constraint added. The answer avoids making up information not in the context."
+    },
+    {
+      "question": "Why did the database connections run out during Bl",
+      "target": "SHOP-402",
+      "retrieved": "SHOP-402",
+      "correct_retrieval": true,
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer partially captures the correct reasons for connection pool exhaustion, but it lacks specific technical details and error codes mentioned in the ground truth. The answer avoids making up information not present in the context."
+    },
+    {
+      "question": "What's wrong with the analytics conversion rate me",
+      "target": "SHOP-901",
+      "retrieved": "SHOP-901",
+      "correct_retrieval": true,
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely wrong as it does not identify the actual issue with the analytics conversion rate metric. It also fails to cover any key points from the ground truth, instead providing a generic troubleshooting checklist."
+    },
+    {
+      "question": "How are JWT tokens being handled after password ch",
+      "target": "SHOP-302",
+      "retrieved": "SHOP-302",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer correctly states that JWT tokens are still valid after password changes, which is a security issue. However, it fails to cover the key points from the ground truth, such as the chosen fix and the implementation in migration PR #885."
+    },
+    {
+      "question": "What's causing the product page to load slowly on ",
+      "target": "SHOP-401",
+      "retrieved": "SHOP-401",
+      "correct_retrieval": true,
+      "correctness": 2,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer contains some correct general statements about potential causes of slow page loading, but it lacks specific information and key details from the ground truth. The answer does not introduce any new information not present in the context."
+    },
+    {
+      "question": "What's wrong with the FedEx webhook integration?",
+      "target": "SHOP-501",
+      "retrieved": "SHOP-501",
+      "correct_retrieval": true,
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer partially correctly identifies the issue with the FedEx webhook status mapping, but it does not mention the incorrect mapping of specific status codes (IT, DL, DE) or the lack of signature verification. The answer avoids making up information not in the context."
+    },
+    {
+      "question": "Why is the CI/CD pipeline so slow and what's the p",
+      "target": "SHOP-1001",
+      "retrieved": "SHOP-1001",
+      "correct_retrieval": true,
+      "correctness": 0,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer contains no correct facts from the ground truth, and it does not cover any key points from the ground truth. The answer is entirely based on general suggestions and does not address the specific context provided."
+    }
+  ],
+  "summary_desc": [
+    {
+      "question": "What caused the Stripe payment errors and how was ",
+      "target": "SHOP-101",
+      "retrieved": "SHOP-101",
+      "correct_retrieval": true,
+      "correctness": 2,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer contains some correct facts, such as the error message and the context of the issue, but it incorrectly identifies the root cause of the problem. The answer also fails to mention the key points from the ground truth, such as the caching issue with Redis and the API key rotation."
+    },
+    {
+      "question": "Why are customers not receiving order status email",
+      "target": "SHOP-503",
+      "retrieved": "SHOP-503",
+      "correct_retrieval": true,
+      "correctness": 2,
+      "completeness": 2,
+      "hallucination": 4,
+      "reasoning": "The answer contains some correct facts, but it also includes several incorrect or unrelated points, such as email configuration settings, email queue buildup, and email template issues. The answer also fails to mention the key points from the ground truth, such as the SendGrid API key rotation and the use of RabbitMQ."
+    },
+    {
+      "question": "How is the search zero results problem being solve",
+      "target": "SHOP-201",
+      "retrieved": "SHOP-201",
+      "correct_retrieval": true,
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely wrong as it does not mention any solution to the search zero results problem. It only states that the context does not contain any information about the solution, which is a correct observation but not relevant to the question."
+    },
+    {
+      "question": "What's the root cause of the overselling bug and w",
+      "target": "SHOP-601",
+      "retrieved": "SHOP-601",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the root cause of the overselling bug as a race condition and the fix as an atomic UPDATE statement with a WHERE clause. It also provides the correct SQL statement and corresponding Python code, making it a comprehensive and accurate response."
+    },
+    {
+      "question": "Why did the database connections run out during Bl",
+      "target": "SHOP-402",
+      "retrieved": "SHOP-402",
+      "correct_retrieval": true,
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the root cause of the issue (long-running inventory check queries) but misses the specific details about the connection pool being exhausted within 5 minutes and the impact of auto-scaling. The answer also does not mention the fixes implemented, which are key points from the ground truth."
+    },
+    {
+      "question": "What's wrong with the analytics conversion rate me",
+      "target": "SHOP-901",
+      "retrieved": "SHOP-901",
+      "correct_retrieval": true,
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the issue with the high conversion rate, but it doesn't mention the actual cause (swapped numerator and denominator in the formula) or the solution (PR #930). The answer also makes some general recommendations that are not specific to the issue at hand."
+    },
+    {
+      "question": "How are JWT tokens being handled after password ch",
+      "target": "SHOP-302",
+      "retrieved": "SHOP-302",
+      "correct_retrieval": true,
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the security issue with JWT tokens after password changes, but it doesn't mention the specific fix implemented in migration PR #885. The answer also avoids making up information not in the context."
+    },
+    {
+      "question": "What's causing the product page to load slowly on ",
+      "target": "SHOP-401",
+      "retrieved": "SHOP-401",
+      "correct_retrieval": true,
+      "correctness": 2,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer contains some correct facts, such as the importance of page size and weight, resource loading, and network requests. However, it lacks specific details and fails to identify the actual root causes of the slow loading issue."
+    },
+    {
+      "question": "What's wrong with the FedEx webhook integration?",
+      "target": "SHOP-501",
+      "retrieved": "SHOP-501",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the incorrect status mapping and the lack of signature verification, and does not introduce any new information not present in the context. The answer provides a clear and concise explanation of the issues with the FedEx webhook integration."
+    },
+    {
+      "question": "Why is the CI/CD pipeline so slow and what's the p",
+      "target": "SHOP-1001",
+      "retrieved": "SHOP-1001",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the CI/CD pipeline's slow execution time and the optimization plan to fix it. The answer covers all key points from the ground truth without introducing any unsupported claims."
+    }
+  ],
+  "blob_all": [
+    {
+      "question": "What caused the Stripe payment errors and how was ",
+      "target": "SHOP-101",
+      "retrieved": "SHOP-101",
+      "correct_retrieval": true,
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the root cause of the Stripe payment errors and the solution implemented in v2.4.2. However, it slightly misstates the original TTL (24 hours) and the exact fix (reduced TTL to 6 hours or added cache bust on rotation)."
+    },
+    {
+      "question": "Why are customers not receiving order status email",
+      "target": "SHOP-503",
+      "retrieved": "SHOP-503",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts from the ground truth, covering all key points and not introducing any unsupported claims. The answer is a direct summary of the events described in the context."
+    },
+    {
+      "question": "How is the search zero results problem being solve",
+      "target": "SHOP-201",
+      "retrieved": "SHOP-204",
+      "correct_retrieval": false,
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely incorrect as it does not mention anything about the search zero results problem being solved, and it is unrelated to the ground truth. The answer is also well-grounded in the context, but it introduces a new topic unrelated to the original question."
+    },
+    {
+      "question": "What's the root cause of the overselling bug and w",
+      "target": "SHOP-601",
+      "retrieved": "SHOP-601",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the root cause of the overselling bug as a race condition in the inventory service and provides a correct fix using an atomic UPDATE statement with a WHERE clause. The answer also mentions the addition of a database constraint to enforce a positive count, which is consistent with the ground truth."
+    },
+    {
+      "question": "Why did the database connections run out during Bl",
+      "target": "SHOP-402",
+      "retrieved": "SHOP-402",
+      "correct_retrieval": true,
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the root cause of the issue (long-running inventory check queries) and the impact on the connection pool, but it doesn't mention the role of auto-scaling in exacerbating the problem. The answer also doesn't mention the fixes implemented, such as deploying PgBouncer, optimizing inventory queries, and adding a Redis-based inventory cache."
+    },
+    {
+      "question": "What's wrong with the analytics conversion rate me",
+      "target": "SHOP-901",
+      "retrieved": "SHOP-901",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the incorrect formula and its consequences. It also correctly identifies the correct formula and mentions the fix and added unit tests."
+    },
+    {
+      "question": "How are JWT tokens being handled after password ch",
+      "target": "SHOP-302",
+      "retrieved": "SHOP-302",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the security issue with JWT tokens after password changes, the impact of the issue, and the chosen fix. It also avoids making up any information not present in the context."
+    },
+    {
+      "question": "What's causing the product page to load slowly on ",
+      "target": "SHOP-401",
+      "retrieved": "SHOP-401",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts from the ground truth, covering all key points and avoiding any unsupported claims. The answerer correctly identifies the root causes of the slow product page load times and provides actionable solutions."
+    },
+    {
+      "question": "What's wrong with the FedEx webhook integration?",
+      "target": "SHOP-501",
+      "retrieved": "SHOP-501",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the incorrect status mapping and the lack of signature verification. It also correctly mentions the fixes implemented in PR #910 and the backfilling of orders with incorrect statuses."
+    },
+    {
+      "question": "Why is the CI/CD pipeline so slow and what's the p",
+      "target": "SHOP-1001",
+      "retrieved": "SHOP-1001",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states all the facts from the ground truth, including the breakdown of the pipeline time and the optimization plan. It also correctly mentions the current status and target of the pipeline optimization."
+    }
+  ],
+  "labeled_fields": [
+    {
+      "question": "What caused the Stripe payment errors and how was ",
+      "target": "SHOP-101",
+      "retrieved": "SHOP-101",
+      "correct_retrieval": true,
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the root cause of the Stripe payment errors and the solution, but it slightly misstates the TTL reduction (24 hours to 6 hours) and the exact fix (reducing TTL or adding cache invalidation). The answer does not introduce any new information not present in the context."
+    },
+    {
+      "question": "Why are customers not receiving order status email",
+      "target": "SHOP-503",
+      "retrieved": "SHOP-503",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts, including the 403 Forbidden error, the SendGrid API key rotation, and the production key update. However, it does not mention the re-sent backlogged emails and the plan to move secrets to HashiCorp Vault, which are key points in the ground truth."
+    },
+    {
+      "question": "How is the search zero results problem being solve",
+      "target": "SHOP-201",
+      "retrieved": "SHOP-204",
+      "correct_retrieval": false,
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely unrelated to the ground truth, which discusses the solution to the search zero results problem, whereas the answer talks about hiding or greyed out facet values. The answer does not make up any information not in the context, but it is entirely off-topic."
+    },
+    {
+      "question": "What's the root cause of the overselling bug and w",
+      "target": "SHOP-601",
+      "retrieved": "SHOP-601",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the root cause of the overselling bug as a race condition in the inventory service and correctly describes the fix using an atomic UPDATE statement. However, it does not mention the additional database constraint added to prevent negative inventory counts."
+    },
+    {
+      "question": "Why did the database connections run out during Bl",
+      "target": "SHOP-402",
+      "retrieved": "SHOP-402",
+      "correct_retrieval": true,
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer correctly identifies the root cause of the issue (long-running inventory check queries) and mentions the connection pool being exhausted. However, it lacks details about the connection queue backlog, auto-scaler adding new pods, and the fixes implemented (PgBouncer, query optimization, Redis-based cache, and circuit breaker pattern). The answer does not introduce any new information not present in the context."
+    },
+    {
+      "question": "What's wrong with the analytics conversion rate me",
+      "target": "SHOP-901",
+      "retrieved": "SHOP-901",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the incorrect formula and its consequences, but it doesn't mention the specific line number or the PR number where the fix was implemented. The answer is grounded in the provided context and doesn't introduce any new, unsupported information."
+    },
+    {
+      "question": "How are JWT tokens being handled after password ch",
+      "target": "SHOP-302",
+      "retrieved": "SHOP-302",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about JWT tokens not being invalidated after password changes and the impact of this vulnerability. It also correctly identifies the chosen fix and its implementation."
+    },
+    {
+      "question": "What's causing the product page to load slowly on ",
+      "target": "SHOP-401",
+      "retrieved": "SHOP-401",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states all the facts from the ground truth, covering all key points and not introducing any unsupported claims. The answer is a direct reflection of the provided context and ground truth."
+    },
+    {
+      "question": "What's wrong with the FedEx webhook integration?",
+      "target": "SHOP-501",
+      "retrieved": "SHOP-501",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the incorrect status mapping and lack of signature verification. It also correctly identifies the issues and their consequences, and mentions the fix in PR #910."
+    },
+    {
+      "question": "Why is the CI/CD pipeline so slow and what's the p",
+      "target": "SHOP-1001",
+      "retrieved": "SHOP-1001",
+      "correct_retrieval": true,
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts from the ground truth, covering all key points and not introducing any new, unsupported information. The answer is a direct copy of the ground truth, with some minor rephrasing."
+    }
+  ]
+}

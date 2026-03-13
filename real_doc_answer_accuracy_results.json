@@ -1,0 +1,578 @@
+{
+  "chunk_500_direct": [
+    {
+      "correctness": 4,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer mostly accurately states the facts about Executive Order 14181, but incorrectly states the goal of overriding existing activities. The answer fails to cover key points about Action 5 and the expected increase in water deliveries. The answer avoids making up information not in the context.",
+      "context_len": 500
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer partially captures the correct timeline of the 2019 BiOps and litigation, but it omits key details such as the conclusion of the BiOps, the Biden Administration's reconsideration, and the eventual dismissal of the litigation. The answer avoids making up information not in the context.",
+      "context_len": 500
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer gets some facts correct, such as the purpose of the Bay-Delta Water Quality Control Plan update and the reduction in water supplies. However, it lacks key details, including the specific percentage of unimpaired flows required, the estimated cost of voluntary agreements, and the opposition from Reclamation.",
+      "context_len": 500
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks the specific details about the settlement agreements and the priority of these contractors. The answer does not introduce any new information not present in the context.",
+      "context_len": 500
+    },
+    {
+      "correctness": 4,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct in terms of the project's purpose and design, but it lacks key information about the project's current status and estimated cost. The answer does not introduce any new information not present in the context.",
+      "context_len": 500
+    },
+    {
+      "correctness": 4,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct but lacks key details about the Friant Dam operation, the court ruling, and the settlement. It does not introduce any new information not present in the context.",
+      "context_len": 500
+    },
+    {
+      "correctness": 3,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer is partially correct but lacks specific information about south-of-Delta agricultural contractors. It avoids making up information not in the context, but fails to cover key points from the ground truth.",
+      "context_len": 500
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer gets some facts correct, such as the execution year of the COA and its purpose, but it lacks crucial details about the agreement's specifics and operational changes. The answer avoids making up information not present in the context.",
+      "context_len": 500
+    },
+    {
+      "correctness": 2,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer lacks key facts about the WIIN Act's CVP operational provisions and their implementation, resulting in a low completeness score. The answer does not introduce new information not present in the context, earning a high hallucination score.",
+      "context_len": 500
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks information about the other ESA-listed species affected by CVP and SWP operations. The answer does not introduce any new information not present in the context.",
+      "context_len": 500
+    }
+  ],
+  "chunk_500_expand": [
+    {
+      "correctness": 4,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks information about Action 5 and the exact date of the executive order is correct but the context provided suggests it was issued on January 20, 2025, not January 24, 2025. The answer does not make up any information not present in the context.",
+      "context_len": 3506
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some details about the subsequent events, such as the Biden Administration's Executive Order 13990 and the new BiOps and ROD finalized in late 2024. The answer avoids making up information not in the context, sticking to the provided details.",
+      "context_len": 3506
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer mostly accurately states the facts about the Bay-Delta Water Quality Control Plan update, but it lacks specific details about the flow requirements and the estimated cost of voluntary agreements. The answer does not introduce any information not present in the context.",
+      "context_len": 3506
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct but lacks specific details about the settlement agreements and exchange contracts. It also avoids making up information not present in the context.",
+      "context_len": 500
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks the specific details about the lawsuits and the trial court's decision, which are key points in the ground truth. The answer also avoids making up information not in the context, sticking to the provided information.",
+      "context_len": 3506
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer is partially correct but lacks key details about the creation of the SJRRP. It avoids making up information not in the context, but fails to cover all key points from the ground truth.",
+      "context_len": 3506
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer contains some correct facts, such as the average CVP water allocations since the early 1980s and the extremely dry water years of 2012-2015. However, it fails to address the specific water allocations for south-of-Delta agricultural contractors in recent years, which is the main focus of the question.",
+      "context_len": 3506
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer mostly accurately states the facts about the Coordinated Operations Agreement, but it lacks specific details about the adjusted ratios in the 2018 addendum. The answer avoids making up information not present in the context.",
+      "context_len": 3506
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer mostly accurately states the facts about the WIIN Act's CVP operational provisions, but it misses some details such as the specific BiOps and the results of the relaxed inflow-to-export ratios. The answer does not introduce any new information not present in the context.",
+      "context_len": 3506
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the species affected by CVP and SWP operations, including the status of Delta smelt. It also covers all key points from the ground truth without introducing any unsupported claims.",
+      "context_len": 3506
+    }
+  ],
+  "chunk_1000_direct": [
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about Executive Order 14181 and Action 5, with no key errors. However, it does not mention the expected increase in CVP and SWP deliveries, which is a key point from the ground truth. The answer also avoids making up information not in the context, sticking to the provided details.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct but lacks some key details, such as the Biden Administration's reconsideration of the 2019 BiOps and the finalization of new BiOps and ROD in late 2024. The answer also avoids making up information not in the context, sticking to the provided details.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer gets some facts correct, such as the updates in 1991, 1995, and 2006, but it lacks crucial information about the Bay-Delta Plan Update, its effects on water supplies, and the proposed amendments. The answer does not introduce any new information not present in the context.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is almost entirely correct, with accurate descriptions of the Sacramento River Settlement Contractors and San Joaquin River Exchange Contractors. The only minor omission is the lack of specific details about the San Joaquin River Exchange Contractors, but this is not a significant error.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct but lacks the estimated cost and the current status of the project. It also avoids making up information not present in the context.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 2,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer is partially correct but lacks key information about the creation of the San Joaquin River Restoration Program. It does not introduce any new or unsupported claims, but it fails to provide a complete understanding of the program's purpose.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely wrong as it states that the provided context does not contain specific information about CVP water allocations, which is not true. The answer also fails to cover any key points from the ground truth, and it does not make any unsupported claims, so it receives a perfect score for hallucination.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 4,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer gets most of the facts correct, but misses the specific details about the sharing ratios and export capacity sharing. It avoids making up information not in the context, but fails to cover all key points from the ground truth.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct but lacks specific details about the WIIN Act's CVP operational provisions and their expiration. It accurately states the incorporation of WIIN Act principles into BiOps and avoids making up information not in the context.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about Delta smelt and anadromous salmonid species being affected by CVP operations, and correctly mentions the status of Delta smelt. However, it misses the specific names of the anadromous salmonid species. The answer does not introduce any new information not present in the context.",
+      "context_len": 1000
+    }
+  ],
+  "chunk_1000_expand": [
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about Executive Order 14181 and Action 5, with no key errors. However, it misses some details about the expected increase in water deliveries and the lawsuit filed by the Center for Biological Diversity. The answer does not introduce any information not present in the context.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer gets some facts correct, such as the date of the ROD and the lawsuit, but it misses key points like the conclusion of the BiOps, the Biden Administration's reconsideration, and the final resolution of the litigation. The answer sticks to the provided context and does not introduce any new or unsupported information.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer mostly accurately states the facts about the Bay-Delta Water Quality Control Plan update, but it lacks specific details about the flow objectives, revised salinity levels, and the estimated costs of the plan. The answer avoids making up information not in the context.",
+      "context_len": 5004
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct but lacks some details about the settlement agreements and the priority of water rights. It avoids making up information not in the context.",
+      "context_len": 1000
+    },
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is almost entirely correct, with accurate information about the Delta Conveyance Project, its purpose, and its current status. The only minor omission is the lack of information about the current status after the appeals court's decision in October 2025.",
+      "context_len": 5004
+    },
+    {
+      "correctness": 2,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer is partially correct but lacks key information about the San Joaquin River Restoration Program. It does not introduce any new, unsupported claims, but fails to provide a comprehensive understanding of the program.",
+      "context_len": 5004
+    },
+    {
+      "correctness": 3,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer is partially correct, but it fails to address the main question about the variation in CVP water allocations for south-of-Delta agricultural contractors in recent years. The answer also avoids making up information not in the context, sticking to the provided text.",
+      "context_len": 5004
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some specific details about the 2018 addendum, such as the exact water-year types and the ESA requirements. The answer does not introduce any new information not present in the context.",
+      "context_len": 5004
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some details about the implementation and results of the WIIN Act's CVP operational provisions. The answer avoids making up information not in the context, sticking to the provided information.",
+      "context_len": 5004
+    },
+    {
+      "correctness": 5,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states the facts about the species affected by CVP operations and the status of Delta smelt. However, it misses the specific names of the anadromous salmonid species, which is a key point in the ground truth.",
+      "context_len": 1000
+    }
+  ],
+  "chunk_2000_direct": [
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks specific details about the Trump Administration ROD and the ESA exemption processes mentioned in the ground truth. The answer avoids making up information not in the context, sticking to the provided information.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks the detail about the Biden Administration's reconsideration of the 2019 BiOps and the finalization of new BiOps and ROD in late 2024. The answer does not introduce any new information not present in the context.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 3,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer gets some facts correct, such as the Bay-Delta Plan Update being carried out in two separate processes and the potential for pumping restrictions to meet state-set water quality levels. However, it lacks key information, such as the specific flow requirements for the San Joaquin River and the estimated costs of voluntary agreements.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some specific details such as the exact number of San Joaquin River Exchange Contractors and the fact that Sacramento River Settlement Contractors receive 100% of their contracted amounts in most water-year types. The answer does not introduce any new information not present in the context.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer mostly accurately states the facts about the Delta Conveyance Project, but it misses the specific reason for the project's estimated $20.1 billion cost being paid largely by public water agencies and ratepayers. The answer avoids making up information not in the context, sticking to the provided supporting information.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks the specific details about the Friant Dam operation and the court ruling. The answer avoids making up information not in the context.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer contains some correct facts, such as the average annual water allocations for CVP contractors and the reduced deliveries during drought years. However, it fails to address the specific question about south-of-Delta agricultural contractors and does not provide accurate information about their allocations.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely incorrect as it does not mention the Coordinated Operations Agreement between CVP and SWP, and it does not provide any information about the agreement. The answer is also grounded in the context as it states that the provided context does not mention the Coordinated Operations Agreement.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some specific details about the WIIN Act's provisions and their implementation. The answer does not introduce any new information not present in the context.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer partially correctly identifies the implication of CVP operations on listed species, but fails to accurately state the species affected. The answer also inaccurately states that the context does not provide information on the Delta smelt's status, when in fact it does.",
+      "context_len": 2000
+    }
+  ],
+  "chunk_2000_expand": [
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer mostly accurately states the facts about Executive Order 14181 and Action 5, but it lacks some specific details such as the expected increase in water deliveries and the lawsuit filed by the Center for Biological Diversity. The answer does not introduce any information not present in the context.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct but lacks some details, such as the Biden Administration's Executive Order 13990 and the new BiOps and ROD finalized in late 2024. The answer avoids making up information not in the context, sticking to the provided information.",
+      "context_len": 10004
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks specific details about the 2018 amendments and the estimated cost of voluntary agreements. It also avoids making up information not present in the context, sticking to the provided facts.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some specific details such as the exact number of San Joaquin River Exchange Contractors and the fact that Sacramento River Settlement Contractors are the largest contract holders of CVP water by percentage of total contracted amounts. The answer avoids making up information not in the context.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some details such as the project's purpose being introduced by Governor Newsom in 2019 and the Delta Reform Act certification requirement. The answer does not introduce any new information not present in the context.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 4,
+      "completeness": 3,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks the specific details about the Friant Dam operation and the court ruling. The answer does not introduce any new information not present in the context.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 3,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer gets some facts correct, but it fails to mention the specific years and allocations for south-of-Delta agricultural contractors, which are key points in the ground truth. The answer also does not provide any information not present in the context, thus avoiding hallucination.",
+      "context_len": 10004
+    },
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely incorrect as it does not mention the Coordinated Operations Agreement between CVP and SWP, and instead asks for more information. The answer does not make up any information not in the context, so it scores high on hallucination.",
+      "context_len": 10004
+    },
+    {
+      "correctness": 5,
+      "completeness": 5,
+      "hallucination": 5,
+      "reasoning": "The answer accurately states all the facts from the ground truth, covering the key points about the WIIN Act's CVP operational provisions and their expiration. The answer also avoids making up any information not present in the context.",
+      "context_len": 2000
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer correctly states that the incidental take statement and BiOps are related to listed species, but it fails to mention the specific species affected by CVP operations. The answer also correctly notes that the Delta smelt is listed under the ESA, but it does not mention the status of the Delta smelt population.",
+      "context_len": 10004
+    }
+  ],
+  "chunk_4000_direct": [
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely wrong about Executive Order 14181 and Action 5, and does not mention them at all. It instead talks about a different bill, H.R. 6639, which is not relevant to the question.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely wrong as it does not mention the 2019 Biological Opinions and the associated litigation at all, despite the context provided. The answer is grounded in context, but it is irrelevant to the question being asked.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks specific details about the Sacramento River updates and the implementation timeline. The answer does not introduce any new information not present in the context.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks specific details about the number of San Joaquin River Exchange Contractors and the maximum entitlement reduction during shortage years. The answer avoids making up information not in the context, sticking to the provided information.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some details about the project's timeline and the specific reasons for the lawsuits. The answer does not introduce any new information not present in the context.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some details about the lawsuit and the settlement process. The answer does not introduce any new information not present in the context.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 2,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer contains some correct facts, such as the average annual water deliveries and the impact of drought years. However, it fails to address the specific question about south-of-Delta agricultural contractors and includes irrelevant information about other types of contractors.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 3,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer partially gets the facts correct but misses key details about the Coordinated Operations Agreement, such as the 1986 agreement and the 2018 addendum. The answer does not introduce any new information not present in the context.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely wrong as it does not mention the WIIN Act's CVP operational provisions at all. The answer avoids making up information not in the context, as it only discusses CVP operations under the 2019 BiOps and the 2020 ROD, and does not mention the WIIN Act.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer partially correctly identifies the Delta smelt as being affected by CVP operations, but fails to mention other species. It also does not provide the correct status of the Delta smelt, which is a crucial aspect of the ground truth.",
+      "context_len": 4000
+    }
+  ],
+  "chunk_4000_expand": [
+    {
+      "correctness": 5,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely correct and does not contain any errors. It does not cover any key points from the ground truth, and it does not make up any information not in the context, as it simply states that there is no information about Executive Order 14181 or Action 5.",
+      "context_len": 12002
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks the detail about the 2024 Biological Opinions and Record of Decision being finalized by the Biden Administration. The answer avoids making up information not in the context, sticking to the provided details.",
+      "context_len": 12002
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer mostly accurately states the facts, but it lacks specific details about the Sacramento River updates and the implementation timeline. The answer stays within the context provided and does not introduce any new, unsupported information.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer mostly accurately states the facts about Sacramento River Settlement Contractors and San Joaquin River Exchange Contractors, but it lacks some details present in the ground truth. The answer does not introduce any new information not present in the context.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it lacks some specific details such as the project's purpose being introduced by Governor Newsom in 2019 and the project's current status being approved by the State of California. The answer avoids making up information not in the context, sticking to the provided details.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 4,
+      "completeness": 4,
+      "hallucination": 5,
+      "reasoning": "The answer is mostly correct, but it incorrectly states that the settlement agreement was reached in 2000, when it was actually reached in 2006. The answer also lacks some details from the ground truth, such as the specific legislation that implemented the program and the exact court case that led to the settlement.",
+      "context_len": 4000
+    },
+    {
+      "correctness": 2,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer gets some facts correct, such as the mention of drought years and reduced deliveries, but it fails to provide any information about recent years' allocations, which is a key point in the ground truth. The answer does not make up any information not present in the context.",
+      "context_len": 12002
+    },
+    {
+      "correctness": 0,
+      "completeness": 0,
+      "hallucination": 5,
+      "reasoning": "The answer is completely incorrect as it does not mention the Coordinated Operations Agreement between CVP and SWP, and instead refers to a non-existent \"Combined CVP/SWP Operations\" on page 12 of the document. The answer does not make up any information not in the context, but rather fails to address the actual topic.",
+      "context_len": 12002
+    },
+    {
+      "correctness": 3,
+      "completeness": 1,
+      "hallucination": 5,
+      "reasoning": "The answer partially captures some correct facts, but it fails to mention the WIIN Act's CVP operational provisions and their expiration, which are key points in the ground truth. The answer does not introduce any information not present in the context.",
+      "context_len": 12002
+    },
+    {
+      "correctness": 3,
+      "completeness": 2,
+      "hallucination": 5,
+      "reasoning": "The answer gets some facts correct, such as the regulatory factors affecting CVP operations, but it fails to mention the species affected by CVP operations and the status of the Delta smelt. The answer avoids making up information not in the context, but it does not provide a comprehensive answer to the question.",
+      "context_len": 12002
+    }
+  ]
+}
