@@ -1,29 +1,331 @@
 """
 Multi-Vector RAG Pipeline for Jira Ticket Resolution Suggestion.
 
-Architecture:
-  1. INDEX: For each historical ticket, create two separate embeddings:
-     - Problem vector: summary + description (the symptom/bug report)
-     - Resolution vector: comments (where the fix discussion lives)
-  2. RETRIEVE: Embed incoming ticket (summary + description), search against
-     problem vectors to find similar historical tickets.
-  3. SYNTHESIZE: Feed the resolution text from top-K matched tickets to an LLM,
-     which synthesizes a suggested resolution for the new ticket.
+================================================================================
+PRODUCTION ARCHITECTURE OVERVIEW
+================================================================================
 
-Why this works:
-  - New tickets describe problems. Historical tickets also describe problems
-    (in summary + description) and solutions (in comments).
-  - Matching problem-to-problem uses the same vocabulary (error messages,
-    symptoms, affected components), so retrieval accuracy is high.
-  - Returning the resolution (not the problem) gives the LLM the actual fix
-    details to work with.
+Core Pipeline (implemented below):
+  1. INDEX: For each historical ticket, create two separate embeddings:
+     - Problem vector: embed(summary + description)
+     - Resolution vector: embed(comments)
+  2. RETRIEVE: Embed incoming ticket, search against problem vectors.
+  3. SYNTHESIZE: Feed resolution text from top-K matches to LLM.
+
+Why Multi-Vector wins:
+  - New tickets describe problems in "problem language" (error msgs, symptoms).
+  - Historical tickets have problems AND resolutions in different vocabulary.
+  - Match problem-to-problem (same vocabulary = high retrieval accuracy),
+    then return the resolution (actual fix details for LLM synthesis).
+
+================================================================================
+INCREMENTAL SYNC PLAN (not yet implemented)
+================================================================================
+
+Problem:
+  Re-embedding all tickets on every sync is wasteful. With 50K+ tickets and
+  embedding API costs ($0.18/1M tokens), a full reindex costs real money and
+  takes time. Most tickets don't change between syncs.
+
+Solution: Content-hash tracking with per-field granularity.
+
+  For each ticket, maintain TWO separate hashes:
+    - problem_hash  = sha256(summary + description)
+    - resolution_hash = sha256(comments joined)
+
+  This allows surgical re-embedding — if only a comment is added (resolution
+  changes), only the resolution vector is re-embedded. The problem vector
+  stays untouched. And vice versa.
+
+Sync Flow:
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ NIGHTLY SYNC (cron)                                                 │
+  │                                                                     │
+  │  1. Fetch all resolved tickets from Jira (status = Done)            │
+  │     - Use JQL: "status = Done AND updated >= {last_sync_timestamp}" │
+  │     - This pulls only tickets changed since last sync               │
+  │                                                                     │
+  │  2. For each ticket, compute:                                       │
+  │     - new_problem_hash  = sha256(summary + description)             │
+  │     - new_resolution_hash = sha256(comments)                        │
+  │                                                                     │
+  │  3. Look up stored hashes from hash_store (SQLite/Redis/JSON):      │
+  │     - stored = hash_store.get(ticket_key)                           │
+  │                                                                     │
+  │  4. Compare and act:                                                │
+  │                                                                     │
+  │     ┌─────────────────────┬──────────────────────────────────────┐  │
+  │     │ Condition           │ Action                               │  │
+  │     ├─────────────────────┼──────────────────────────────────────┤  │
+  │     │ No stored hash      │ NEW ticket — embed both vectors,    │  │
+  │     │ (first time seen)   │ upsert into both collections,       │  │
+  │     │                     │ save both hashes                     │  │
+  │     ├─────────────────────┼──────────────────────────────────────┤  │
+  │     │ problem_hash differs│ Re-embed ONLY problem vector,       │  │
+  │     │ resolution_hash same│ upsert into problem collection,     │  │
+  │     │                     │ update problem_hash                  │  │
+  │     ├─────────────────────┼──────────────────────────────────────┤  │
+  │     │ problem_hash same   │ Re-embed ONLY resolution vector,    │  │
+  │     │ resolution_hash diff│ upsert into resolution collection,  │  │
+  │     │                     │ update resolution_hash               │  │
+  │     ├─────────────────────┼──────────────────────────────────────┤  │
+  │     │ Both hashes match   │ SKIP — no embedding needed           │  │
+  │     ├─────────────────────┼──────────────────────────────────────┤  │
+  │     │ Ticket deleted or   │ DELETE vectors from both collections,│  │
+  │     │ status reverted     │ remove from hash_store               │  │
+  │     └─────────────────────┴──────────────────────────────────────┘  │
+  │                                                                     │
+  │  5. Update last_sync_timestamp                                      │
+  │                                                                     │
+  │  6. Log sync summary:                                               │
+  │     - "Synced 1,247 tickets: 12 new, 45 problem_updated,           │
+  │       89 resolution_updated, 1,101 skipped, 0 deleted"             │
+  └──────────────────────────────────────────────────────────────────────┘
+
+Hash Store Schema (SQLite recommended — single file, no infra):
+  CREATE TABLE ticket_hashes (
+      ticket_key       TEXT PRIMARY KEY,
+      problem_hash     TEXT NOT NULL,
+      resolution_hash  TEXT NOT NULL,
+      last_synced_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+Cost Impact Example (50K tickets, nightly sync):
+  - Full reindex:  50K tickets × ~500 tokens avg = 25M tokens = $4.50/run
+  - Incremental:   ~200 changed tickets × 500 tokens = 100K tokens = $0.02/run
+  - Savings:       ~99.6% reduction in embedding costs
+
+Edge Cases to Handle:
+  - Ticket reopened (status Done -> In Progress): keep vectors, they're still
+    useful as historical context. Only delete if ticket is actually deleted.
+  - Comment edited (not just added): resolution_hash catches this since it
+    hashes all comments joined.
+  - Ticket with no comments yet: resolution vector uses summary as fallback.
+    When first comment is added, resolution_hash changes → re-embed.
+  - Bulk import (first run): no stored hashes, so everything gets embedded.
+    This is expected — first run is always a full index.
+  - Hash collision: sha256 collision probability is negligible (~1 in 2^128).
+
+Future Enhancement — Webhook-Based Real-Time Sync:
+  Instead of nightly cron, listen to Jira webhooks for ticket updates.
+  On each webhook event:
+    1. Compute new hashes
+    2. Compare with stored hashes
+    3. Re-embed only what changed
+    4. Update hash store
+  This gives near-real-time index freshness with minimal embedding cost.
+
+================================================================================
+RETRIEVAL DEPTH RESEARCH (top-K selection)
+================================================================================
+
+Sources:
+  - "Lost in the Middle" — Liu et al., Stanford, TACL 2024 (arXiv:2307.03172)
+  - "Found in the Middle" — Calibrating Positional Attention Bias, 2024
+    (arXiv:2406.16008)
+  - "Adaptive-k" — EMNLP 2025 (aclanthology.org/2025.emnlp-main.1017)
+  - "RAG4Tickets" — RAG for Jira/GitHub resolution (arXiv:2510.08667)
+  - "RankRAG" — NeurIPS 2024 (unifying ranking with generation)
+  - "Context Window Utilization" — arXiv:2407.19794v2
+  - Anthropic Contextual Retrieval blog (anthropic.com/news/contextual-retrieval)
+  - LlamaIndex default similarity_top_k=2, LangChain default k=4
+  - LinkedIn RAG implementation: 28.6% reduction in resolution time
+
+Key Findings:
+
+  1. "Lost in the Middle" (Stanford, TACL 2024):
+     LLMs have a U-shaped attention curve — they focus on documents at the
+     BEGINNING and END of context, with up to 30% degradation for information
+     in the middle. More documents = higher chance the relevant one lands in
+     the "dead zone" (positions 4-7 in a K=10 set).
+
+     Implication: Keep K low (3-5) for the LLM, or reorder context so the
+     best match is FIRST and second-best is LAST. Never put the strongest
+     match in the middle.
+
+  2. Optimal K follows an inverted-U curve:
+     Performance improves as K increases (more recall), then degrades
+     (noise overwhelms signal). Research across NQ, TriviaQA, HotpotQA
+     shows scores peak for chunk counts between 6-9 for general QA, but
+     3-5 for focused tasks like ticket resolution.
+
+  3. Context window utilization should stay at 60-70%:
+     Performance degrades ~23% when utilization exceeds 85% of the LLM's
+     context window. Rule of thumb: K × avg_chunk_tokens < 0.7 × window.
+
+  4. Two-stage retrieval is the industry standard:
+     Retrieve broadly (top 20-50) for recall, then rerank (cross-encoder
+     or Cohere Rerank) down to top 3-5 for precision. Reranking improves
+     RAG accuracy by 20-40% with only ~200-500ms additional latency.
+
+     Production examples:
+       - Anthropic: retrieve 150, rerank to 20
+       - Pinecone: retrieve 20, rerank to 5
+       - Zilliz/Milvus: retrieve 50-100, rerank to 10
+
+  5. RAG4Tickets (arXiv:2510.08667) — Jira-specific research:
+     Tested RAG on Jira and GitHub ticket data specifically. Finding:
+     5 tickets with minScore=0.6 is the sweet spot for ticket resolution.
+     Partitions embeddings by artifact type (tickets, comments, PRs)
+     for targeted search — aligns with our multi-vector approach.
+
+  6. Adaptive-K (EMNLP 2025):
+     Instead of fixed K, sort similarity scores descending and find the
+     LARGEST GAP in the score distribution. Only return tickets above
+     the gap. No tuning, no extra latency, auto-adjusts to query
+     difficulty.
+
+     Example:
+       Scores: [0.85, 0.81, 0.78, 0.42, 0.38, 0.35]
+                                      ^^^
+                                largest gap = 0.36
+       Return: top 3 only (above the gap)
+
+     Simple queries → K=2. Complex queries → K=7. Automatic.
+
+  7. Framework defaults for reference:
+       LlamaIndex:  similarity_top_k = 2 (very conservative)
+       LangChain:   k = 4
+       Pinecone:    recommends 5 with reranking
+       Helpdesk:    5, minScore = 0.6
+
+Recommended Retrieval Strategy (based on research):
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ TWO-STAGE RETRIEVAL WITH ADAPTIVE-K                                │
+  │                                                                    │
+  │  Stage 1 — Broad retrieval:                                        │
+  │    Vector search top 20 candidates from problem collection.        │
+  │    Optimized for recall. Fast (~10-50ms).                          │
+  │                                                                    │
+  │  Stage 2 — Rerank:                                                 │
+  │    Cross-encoder (or Cohere Rerank) scores all 20 candidates.      │
+  │    Reorder by relevance. Adds ~200-500ms.                          │
+  │                                                                    │
+  │  Stage 3 — Filter:                                                 │
+  │    Drop anything with similarity < 0.5 (quality gate).             │
+  │    Apply adaptive-K: find largest score gap, trim below it.        │
+  │    Typically 3-5 tickets remain.                                   │
+  │                                                                    │
+  │  Stage 4 — Context ordering (mitigate "lost in the middle"):       │
+  │    Position 1: best match      ← LLM pays most attention           │
+  │    Position 2: weakest match   ← "dead zone", least important here │
+  │    Position 3: second-best     ← LLM also attends to the end       │
+  │                                                                    │
+  │  Stage 5 — LLM synthesis:                                          │
+  │    Feed reordered top 3 to LLM for resolution synthesis.           │
+  │                                                                    │
+  │  Display to engineer:                                              │
+  │    Show all tickets that passed the filter (up to 5), tiered:      │
+  │      High confidence   (>0.7): "Likely Resolution"                 │
+  │      Medium confidence (0.5-0.7): "Possibly Related"               │
+  │      Below 0.5: don't show at all                                  │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  Summary of K at each stage:
+    Vector search:     20 (recall)
+    After rerank:      5-10 (precision)
+    After filter:      3-5 (adaptive-K + threshold)
+    LLM synthesis:     3 (avoid "lost in the middle")
+    Shown to engineer: up to 5 (tiered by confidence)
+
+================================================================================
+RECOMMENDED PRODUCTION STACK
+================================================================================
+
+  Embedding:  voyage-context-3 ($0.18/1M tok, 32K context, contextual chunks)
+  Reranker:   Cohere Rerank or cross-encoder/ms-marco-MiniLM-L-6-v2
+  LLM:        Gemini 2.5 Flash ($0.30/$2.50 per 1M tok, 0.7% hallucination)
+  Vector DB:  Qdrant or Pinecone (persistent, scalable)
+  Hash Store: SQLite (simple) or Redis (if already in stack)
+  Trigger:    Jira webhook on ticket.created → finds similar → posts comment
+  Sync:       Nightly cron reindexes resolved tickets with hash-based skip
+
+================================================================================
+TWO MODES OF OPERATION
+================================================================================
+
+This pipeline serves two distinct use cases through two separate interfaces:
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ TAB 1: ANALYSIS MODE — pipeline.resolve(ticket)                    │
+  │                                                                    │
+  │ Purpose:  "I have a new ticket. What's the fix?"                   │
+  │ Trigger:  Automatic (Jira webhook) or manual (single ticket)       │
+  │ Flow:                                                              │
+  │   1. Embed incoming ticket                                         │
+  │   2. Retrieve top 20 from problem vectors                          │
+  │   3. Filter by min_similarity (0.5) + adaptive-K                   │
+  │   4. Reorder top 3 for "lost in the middle" mitigation             │
+  │   5. LLM synthesizes resolution from top 3 resolution texts        │
+  │   6. Post comment to Jira with resolution + linked tickets         │
+  │                                                                    │
+  │ Returns:                                                           │
+  │   - Synthesized resolution (LLM-generated)                         │
+  │   - Top 3 similar tickets with confidence tiers                    │
+  │                                                                    │
+  │ Optimized for: accuracy, low hallucination, actionable output      │
+  │ LLM calls: 1 (synthesis)                                           │
+  │ Latency: ~2-4 seconds                                              │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ TAB 2: SEARCH MODE — pipeline.search(query)                        │
+  │                                                                    │
+  │ Purpose:  "Show me all tickets related to this problem."           │
+  │ Trigger:  Manual — engineer types a query or pastes ticket text     │
+  │ Flow:                                                              │
+  │   1. Embed the search query                                        │
+  │   2. Retrieve top-K from problem vectors (default K=10)            │
+  │   3. Filter by min_similarity (0.3, more lenient than analysis)    │
+  │   4. Return all matches — NO LLM call                              │
+  │                                                                    │
+  │ Returns:                                                           │
+  │   - List of matching tickets with:                                 │
+  │       ticket_key, summary, similarity score,                       │
+  │       problem snippet, resolution snippet,                         │
+  │       confidence tier (high/medium/low)                            │
+  │                                                                    │
+  │ Use cases:                                                         │
+  │   - Finding multiple references for a complex investigation        │
+  │   - Spotting recurring patterns ("how many auth issues this Q?")   │
+  │   - Building context before a design review                        │
+  │   - Onboarding — "show me past incidents in payment-service"       │
+  │                                                                    │
+  │ Optimized for: breadth, speed, no LLM cost                        │
+  │ LLM calls: 0                                                       │
+  │ Latency: ~200-400ms                                                │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  Key differences:
+    ┌───────────────┬──────────────────────┬──────────────────────────┐
+    │               │ Analysis (resolve)   │ Search (search)          │
+    ├───────────────┼──────────────────────┼──────────────────────────┤
+    │ Goal          │ Get the answer       │ Find references          │
+    │ Results shown │ Top 3                │ Top 10-20                │
+    │ LLM calls     │ 1 (synthesis)        │ 0                        │
+    │ Min similarity│ 0.5 (strict)         │ 0.3 (lenient)            │
+    │ Latency       │ 2-4s                 │ 200-400ms                │
+    │ Cost/query    │ ~$0.001 (LLM tokens) │ ~$0.00003 (embed only)   │
+    │ Output        │ Resolution + tickets │ Ticket list with details │
+    │ Trigger       │ Auto or manual       │ Manual only              │
+    └───────────────┴──────────────────────┴──────────────────────────┘
+
+================================================================================
 
 Usage:
   pipeline = MultiVectorRAG()
   pipeline.index_tickets(historical_tickets)
+
+  # Tab 1 — Analysis: get a resolution for a new ticket
   result = pipeline.resolve(incoming_ticket)
   print(result["resolution"])
   print(result["similar_tickets"])
+
+  # Tab 2 — Search: find all related tickets for investigation
+  results = pipeline.search("payment gateway 500 error after key rotation")
+  for r in results:
+      print(f"{r['ticket_key']} ({r['confidence']}) — {r['summary']}")
 """
 
 import logging
